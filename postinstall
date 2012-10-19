@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ ! -d "${ENCAP_TARGET}/etc" ]; then
+	echo "creating directory: ${ENCAP_TARGET}/etc";
+	mkdir -p "${ENCAP_TARGET}/etc";
+fi
+
+if [ ! -f "${ENCAP_TARGET}/etc/mkencap_environment" ]; then
+	echo "installing: ${ENCAP_TARGET}/etc/mkencap_environment";
+	cp "${ENCAP_SOURCE}/${ENCAP_PKGNAME}/mkencap_environment" "${ENCAP_TARGET}/etc/mkencap_environment";
+fi
+

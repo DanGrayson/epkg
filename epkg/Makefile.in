@@ -1,0 +1,97 @@
+# @configure_input@
+
+### Path settings
+srcdir		= @srcdir@
+top_srcdir	= @top_srcdir@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+bindir		= @bindir@
+
+PACKAGE_NAME	= @PACKAGE_NAME@
+PACKAGE_VERSION	= @PACKAGE_VERSION@
+
+@ENCAP_DEFS@
+
+### Installation programs and flags
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s
+LN_S		= @LN_S@
+MKDIR		= @MKDIR@
+
+### Compiler and link options
+CC		= @CC@
+CFLAGS		= @CFLAGS@
+CPPFLAGS	= -I.. \
+		  -I${srcdir} \
+		  -I${top_srcdir}/lib \
+		  -I${top_srcdir}/common \
+		  -I${top_srcdir}/compat \
+		  -I../listhash \
+		  -I../pathcode \
+		  @CURL_CFLAGS@ \
+		  @CPPFLAGS@
+LDFLAGS		= @LDFLAGS@
+LIBS		= @LIBS@ @CURL_LIBS@
+@SET_MAKE@
+VPATH		= @srcdir@:../pathcode:@top_srcdir@/common
+
+EPKG_DEFAULTS	= -DPLATFORM=\"`../lib/printplatform`\"
+
+
+### Makefile rules - no user-servicable parts below
+
+EPKG_OBJS	= archive.o \
+		  batch.o \
+		  check.o \
+		  clean.o \
+		  compression.o \
+		  download.o \
+		  encap_gsub.o \
+		  epkg.o \
+		  init.o \
+		  install.o \
+		  log.o \
+		  output.o \
+		  remove.o \
+		  update.o \
+		  updatedir.o \
+		  versions.o
+EPKG_HDRS	= ../config.h \
+		  ${srcdir}/epkg.h \
+		  ${top_srcdir}/common/archive.h \
+		  ${top_srcdir}/common/compression.h \
+		  ${top_srcdir}/common/download.h \
+		  ${top_srcdir}/common/init.h \
+		  ${top_srcdir}/lib/encap.h \
+		  ${top_srcdir}/compat/compat.h \
+		  ../listhash/encap_listhash.h \
+		  ../pathcode/encap_pathcode.h
+EPKG_LIBS	= ../lib/libencap.a
+ALL		= epkg
+
+
+all: ${ALL}
+
+.PHONY: clean distclean install
+
+epkg: ${EPKG_OBJS} ${EPKG_LIBS}
+	${CC} ${CFLAGS} ${LDFLAGS} -o epkg ${EPKG_OBJS} ${EPKG_LIBS} ${LIBS}
+
+${EPKG_OBJS}: ${EPKG_HDRS}
+
+epkg.o: ${srcdir}/epkg.c # ../lib/printplatform
+	${CC} ${CFLAGS} ${CPPFLAGS} ${EPKG_DEFAULTS} -c -o $@ $<
+
+.c.o:
+	${CC} ${CFLAGS} ${CPPFLAGS} -c -o $@ $<
+
+clean:
+	rm -f *~ *.o ${ALL} core
+
+distclean: clean
+	rm -f Makefile
+
+install:
+	${MKDIR} ${DESTDIR}${bindir}
+	${INSTALL_PROGRAM} epkg ${DESTDIR}${bindir}
+

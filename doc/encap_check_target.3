@@ -1,0 +1,74 @@
+.TH encap_check_target 3 "Oct 2002" "University of Illinois" "C Library Calls"
+.SH NAME
+encap_check_target, encap_check_source \- Encap file verification routines
+.SH SYNOPSIS
+.B #include <encap.h>
+.P
+.BI "int encap_check_target(char *" encap_source ", char *" tgt_path ","
+.BI "encap_target_info_t *" tgtinfo ");"
+
+.BI "int encap_check_source(ENCAP *" encap ", char *" dir ","
+.BI "char *" file ", encap_source_info_t *" srcinfo ");"
+.SH VERSION
+This man page documents version 2.3 of \fBlibencap\fP.
+.SH DESCRIPTION
+The \fBencap_check_target\fP() function checks the status of the target file
+\fItgt_path\fP and sets the fields of \fItgtinfo\fP to describe it.  The
+most important field of \fItgtinfo\fP is the \fItgt_flags\fP field, which
+is comprised of zero or more of the following values or'ed together:
+.TP
+.B TGT_EXISTS
+The target file exists.
+.TP
+.B TGT_ISDIR
+The target file is a directory.
+.TP
+.B TGT_ISLNK
+The target file is a symlink.
+.TP
+.B TGT_DEST_EXISTS
+The target link points to an existing file.
+.TP
+.B TGT_DEST_ISDIR
+The target link points to a directory.
+.TP
+.B TGT_DEST_ENCAP_SRC
+The target link points somewhere under the Encap Source directory.
+.TP
+.B TGT_DEST_PKGDIR_EXISTS
+The target link points to an existing package directory.
+.PP
+If \fBTGT_ISLNK\fP is set in \fItgt_flags\fP, the
+\fItgt_link_existing\fP field is set to the path that the link
+points to.  If \fBTGT_DEST_ENCAP_SRC\fP is set in \fItgt_flags\fP, the
+\fItgt_link_existing_pkg\fP and \fItgt_link_existing_pkgdir_relative\fP
+fields are set to point to the package and the path relative to the
+package directory which the link points to, respectively.
+
+The \fBencap_check_source\fP() function sets the fields of the \fIsrcinfo\fP
+structure to describe the Encap source file whose path is
+\fIencap->e_source\fP/\fIencap->e_pkgname\fP/\fIdir\fP/\fIfile\fP.  The
+most important field of \fIsrcinfo\fP is the \fIsrc_flags\fP field, which
+is comprised of zero or more of the following values or'ed together:
+.TP
+.B SRC_REQUIRED
+The symlink for this file must be created successfully in order for
+installation of the package referenced by \fIencap\fP to succeed.
+.TP
+.B SRC_LINKDIR
+The file is a subdirectory, but should be linked directly rather than
+recursively linking its contents.
+.TP
+.B SRC_EXCLUDED
+The file matches an exclude entry and should not be processed.
+.TP
+.B SRC_ISDIR
+The file is a directory.
+.TP
+.B SRC_ISLNK
+The file is a symlink.
+.SH RETURN VALUES
+The \fBencap_check_target\fP() and \fBencap_check_source\fP() functions
+return 0 on success, or -1 on failure (and set \fIerrno\fP).
+.SH SEE ALSO
+.BR encap_open (3)

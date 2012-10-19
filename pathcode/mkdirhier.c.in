@@ -1,0 +1,96 @@
+/* @configure_input@ */
+
+/*
+**  Copyright 1998-2002 University of Illinois Board of Trustees
+**  Copyright 1998-2002 Mark D. Roth
+**  All rights reserved.
+**
+**  @PATHCODE_PREFIX@_mkdirhier.c - recursive directory creation
+**
+**  Mark D. Roth <roth@uiuc.edu>
+**  Campus Information Technologies and Educational Services
+**  University of Illinois at Urbana-Champaign
+*/
+
+#include <@PATHCODE_PREFIX@_pathcode.h>
+
+#include <stdio.h>
+#include <errno.h>
+#include <sys/param.h>
+
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+#ifdef STDC_HEADERS
+# include <string.h>
+#endif
+
+
+
+/*
+** @PATHCODE_PREFIX@_mkdirhier() - create all directories in a given path
+** returns:
+**	0			success
+**	1			no directories needed to be created
+**	-1 (and sets errno)	error
+*/
+int
+@PATHCODE_PREFIX@_mkdirhier(char *path, @PATHCODE_PREFIX@_mkdirhier_printfunc_t *printfunc,
+		  void *state)
+{
+	char src[MAXPATHLEN], dst[MAXPATHLEN] = "";
+	char *dirp, *nextp = src;
+	int retval = 1;
+
+	if (strlcpy(src, path, sizeof(src)) > sizeof(src))
+	{
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	while ((dirp = strsep(&nextp, "/")) != NULL)
+	{
+		if (*dirp == '\0')
+			continue;
+
+		if (dst[0] != '\0' || path[0] == '/')
+			strcat(dst, "/");
+		strcat(dst, dirp);
+
+		if (mkdir(dst, 0755) == -1)
+		{
+			if (errno != EEXIST)
+				return -1;
+		}
+		else
+		{
+			if (printfunc != NULL)
+				(*printfunc)(state, dst);
+			retval = 0;
+		}
+	}
+
+	return retval;
+}
+
+
+#ifdef TEST_MKDIRHIER
+
+static void
+mkdirhier_print(void *state, char *dir)
+{
+	printf("creating directory: %s\n", dir);
+}
+
+
+int
+main(int argc, char *argv[])
+{
+	if (@PATHCODE_PREFIX@_mkdirhier(argv[1], mkdirhier_print, NULL) == -1)
+		perror("@PATHCODE_PREFIX@_mkdirhier()");
+}
+
+#endif /* TEST_MKDIRHIER */
+
+

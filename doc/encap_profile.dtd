@@ -1,0 +1,110 @@
+<?xml version="1.0" ?>
+
+<!-- DTD for mkencap's encap profile format -->
+
+<!ENTITY % boolean	"(yes | no)">
+<!ENTITY % type		"(set | append | prepend | unset)">
+
+<!ELEMENT encap_profile (
+	notes?,
+	ChangeLog?,
+	prereq*,
+	environment*,
+	prepare*,
+	source+,
+	prepackage*,
+	include_file*,
+	encapinfo?
+)>
+<!ATTLIST encap_profile
+	profile_ver	CDATA			#REQUIRED
+	pkgspec		CDATA			#REQUIRED
+>
+
+<!ELEMENT notes		(#PCDATA)>
+
+<!ELEMENT ChangeLog	(change+)>
+
+<!ELEMENT change	(#PCDATA)>
+<!ATTLIST change
+	version		CDATA			#REQUIRED
+	date		CDATA			#IMPLIED
+>
+
+<!ELEMENT prereq	EMPTY>
+<!ATTLIST prereq
+	package		CDATA			#REQUIRED
+	use_bin		%boolean;		#IMPLIED
+	use_lib		%boolean;		#IMPLIED
+>
+
+<!ELEMENT environment	EMPTY>
+<!ATTLIST environment
+	variable	CDATA			#REQUIRED
+	value		CDATA			#IMPLIED
+	type		%type;			#IMPLIED
+>
+
+<!ELEMENT source (
+	unpack*,
+	patch*,
+	configure*,
+	build*,
+	install*,
+	clean*
+)>
+<!ATTLIST source
+	url		CDATA			#REQUIRED
+	subdir		CDATA			#IMPLIED
+	create_subdir	%boolean;		#IMPLIED
+	use_objdir	%boolean;		#IMPLIED
+	build_subdir	CDATA			#IMPLIED
+>
+
+<!ELEMENT unpack	(#PCDATA)>
+<!ATTLIST unpack
+	type		%type;			#IMPLIED
+>
+
+<!ELEMENT patch		(#PCDATA)>
+<!ATTLIST patch
+	url		CDATA			#IMPLIED
+	options		CDATA			#IMPLIED
+	from_dir	CDATA			#IMPLIED
+>
+
+<!ELEMENT configure	(#PCDATA)>
+<!ATTLIST configure
+	type		%type;			#IMPLIED
+>
+
+<!ELEMENT build		(#PCDATA)>
+<!ATTLIST build
+	type		%type;			#IMPLIED
+>
+
+<!ELEMENT install	(#PCDATA)>
+<!ATTLIST install
+	type		%type;			#IMPLIED
+>
+
+<!ELEMENT clean		(#PCDATA)>
+<!ATTLIST clean
+	type		%type;			#IMPLIED
+>
+
+<!ELEMENT prepackage	(#PCDATA)>
+<!ATTLIST prepackage
+	type		%type;			#IMPLIED
+>
+
+<!ELEMENT include_file	(#PCDATA)>
+<!ATTLIST include_file
+	name		CDATA			#REQUIRED
+	owner		CDATA			#IMPLIED
+	group		CDATA			#IMPLIED
+	mode		CDATA			#IMPLIED
+>
+
+<!ELEMENT encapinfo	(#PCDATA)>
+

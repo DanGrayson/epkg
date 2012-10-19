@@ -1,0 +1,3 @@
+* implement generic directory recursion function with plugins
+  (ala ftw(), but can use alternate opendir() and readdir() functions)
+

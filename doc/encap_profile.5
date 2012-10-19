@@ -1,0 +1,701 @@
+.TH encap_profile 5 "Oct 2002" "University of Illinois" "Package Management"
+.SH NAME
+encap_profile \- Encap package creation information
+.SH VERSION
+This man page documents version 1.0 of the Encap profile format.
+.SH DESCRIPTION
+Encap profiles contain all the information needed to build an Encap
+package.  The profile is an XML document.
+.SS THE BASICS OF XML
+As with any XML document, the first line of the profile must be:
+
+.RS
+<?xml version="1.0"?>
+.RE
+
+An XML element with content looks like this:
+
+.RS
+.nf
+<element attribute="value" ...>
+  content
+</element>
+.fi
+.RE
+
+An empty element looks like this:
+
+.RS
+<element attribute="value" ... />
+.RE
+
+Element names are case-sensitive.
+
+The "<" and ">" characters need to be replaced with predefined entity
+tags "&lt;" and "&gt;" when they're not part of an element tag, just
+like in HTML.  However, for whole blocks of text that may contain
+these special characters, you can enclose them like this:
+
+.RS
+.nf
+<![CDATA[
+   echo foo > output
+]]>
+.fi
+.RE
+
+If for some reason you need to include the "]]>" string within a CDATA
+section, you can replace the ">" with its entity tag, just like you'd
+do outside of a CDATA section (i.e., "]]&gt;").
+
+The XML comment delimiters are "<!--" and "-->".
+.SS PROFILE STRUCTURE
+Here's a high-level summary of the hierarchical relationship of the
+elements described below:
+
+.RS
+.nf
+<encap_profile>
+   <notes>
+   <ChangeLog>
+      <change>
+   <prereq>
+   <environment>
+   <prepare>
+   <source>
+      <unpack>
+      <patch>
+      <configure>
+      <build>
+      <install>
+      <clean>
+   <prepackage>
+   <include_file>
+   <encapinfo>
+.fi
+.RE
+.SS The <encap_profile> Element
+The \fI<encap_profile>\fP element is the root XML element of the package
+profile.  All other elements must be contained within the
+\fI<encap_profile>\fP element.
+
+The \fI<encap_profile>\fP element supports the following attributes:
+.TP
+.I profile_ver
+Indicates what version of the Encap Profile format is being used.
+This attribute is mandatory and must have the value "1.0".
+.TP
+.I pkgspec
+Sets the full name of the package to be created.  This attribute is
+mandatory.
+.PP
+Example:
+
+.RS
+.nf
+<encap_profile profile_ver="1.0" pkgspec="foo-1.0+1">
+   ...
+</encap_profile>
+.fi
+.RE
+.SS The <notes> Element
+This optional element may contain arbitrary text.  It is intended to
+store README-style notes.
+
+Example:
+
+.RS
+.nf
+<notes>
+  These are human-readable notes about a profile.
+</notes>
+.fi
+.RE
+.SS The <ChangeLog> and <change> Elements
+The \fI<ChangeLog>\fP element is composed of one or more \fI<change>\fP
+elements that document changes to the profile.  The \fI<ChangeLog>\fP
+element itself supports no attributes.
+
+The \fI<change>\fP element supports the following attributes:
+.TP
+.I date
+Optional.  Indicates the date of the ChangeLog entry.
+.TP
+.I version
+Required.  Indicates the version of the package to which the ChangeLog
+entry applies.
+.PP
+Example:
+
+.RS
+.nf
+<ChangeLog>
+  <change version="1.0+1">
+    Fixed a bug in the postinstall script from version 1.0.
+  </change>
+  <change version="1.0">
+    Initial release.
+  </change>
+</ChangeLog>
+.fi
+.RE
+.SS The <prereq> Element
+The \fI<prereq>\fP element specifies a build-time prerequisite package.
+It may be specified zero or more times, but must be empty.  It supports
+the following attributes:
+.TP
+.I package
+Required.  Specifies the pkgspec of the required package.
+.TP
+.I use_bin
+Optional.  If set to "yes", prepends \fIpackage\fP's \fIbin\fP subdirectory
+to the \fBPATH\fP environment variable.
+.TP
+.I use_lib
+Optional.  If set to "yes", adds \fIpackage\fP's \fIinclude\fP and
+\fIlib\fP subdirectories to the \fBCPPFLAGS\fP and \fBLDFLAGS\fP
+environment variables.
+.PP
+Example:
+
+.RS
+<prereq package="bar-2.5.1" />
+.RE
+.SS The <environment> Element
+Specifies an environment setting.  It may be specified zero or more
+times, but must be empty.  It supports the following attributes:
+.TP
+.I variable
+Required.  The name of the environment variable.
+.TP
+.I value
+Optional.  The new value for the variable.
+.TP
+.I type	
+Optional.  Specifies how the value should be interpretted.  If set
+to "prepend", the value is prepended to the existing value.  If set to
+"append", the content is appended to the existing value.  If set to "set",
+the value completely replaces the existing value.  If set to "unset",
+the variable is unset.  The default is "set".
+.PP
+Example:
+
+.RS
+.nf
+<environment
+	variable="PATH"
+	value=":/usr/local/bin"
+	type="append"
+/>
+.fi
+.RE
+
+See the \fBENVIRONMENT VARIABLES\fP section below for more information
+on how environment variables are set and used.
+.SS The <prepare> Element
+The \fI<prepare>\fP element specifies a set of commands to be executed
+before any \fI<source>\fP elements are processed.  It supports the
+following attributes:
+.TP
+.I type
+Optional.  Specifies how the contents should be interpretted.  If set to
+"prepend", the content is executed before the existing prepare action.
+If set to "append", the content is executed after the existing prepare
+action.  If set to "set", the contents are executed instead of the existing
+prepare action.  If set to "unset", the prepare action is unset.
+The default is "set".
+.PP
+The prepare action is executed in whatever directory \fBmkencap\fP 
+was invoked in.  By default, no prepare commands are executed.
+
+See \fBCOMMAND ELEMENTS\fP below for more information on how the
+\fI<prepare>\fP commands are executed.
+.SS The <source> Element
+Specifies a source (which in this context means "anything you need to
+download to build the package").  It may be specified multiple times,
+but must be specified at least once.  It supports the following
+attributes:
+.TP
+.I url
+Required.  A whitespace-delimited list of one or more URLs where the
+source can be downloaded.
+
+Note that the basename of each URL in the list must be the same.  No
+checking is done to ensure that they do not differ, but the results are
+undefined if they are not identical.
+.TP
+.I subdir
+Optional.  The name of the subdirectory into which the source files will
+be unpacked (if different from the name of the source archive).
+.TP
+.I create_subdir 
+If set to "yes", the subdirectory specified by the "subdir" attribute
+is created and cd'd to before running the unpack action (see below).
+The default is "no".
+.TP
+.I build_subdir
+Optional.  If set, it denotes a relative path from the source directory
+where the configure, build, install, and clean actions are invoked.
+.TP
+.I use_objdir
+Set to "yes" or "no" to indicate whether software can be built in
+an objdir.  Defaults to "yes".
+.PP
+The <source> element contains zero or more of the following elements,
+which are described below:
+.IP \(bu
+.I <unpack>
+.IP \(bu
+.I <patch>
+.IP \(bu
+.I <configure>
+.IP \(bu
+.I <build>
+.IP \(bu
+.I <install>
+.IP \(bu
+.I <clean>
+.PP
+Example:
+
+.RS
+.nf
+<source
+   url="ftp://ftp.isc.org/isc/bind-8.3.3/bind-src.tar.gz"
+   subdir="bind-8.3.3"
+   use_objdir="no"
+/>
+.fi
+.RE
+.SS The <unpack> Element
+Specifies a set of shell commands to use to unpack the source
+archives.  The following attributes are supported:
+.TP
+.I type
+Optional.  Specifies how the contents should be interpretted.  If set
+to "prepend", the content is executed before the existing unpack
+action.  If set to "append", the content is executed after the existing
+unpack action.  If set to "set", the contents are executed instead
+of the existing unpack action.  If set to "unset", the unpack
+action is unset.  The default is "set".
+.PP
+If the \fI<source>\fP element's "use_objdir" attribute is enabled and
+\fBmkencap\fP's common source directory is set, the unpack action is
+executed in the common source directory.  Otherwise, the unpack action
+is executed in a subdirectory of the build tree that is named after the
+pkgspec of the profile.
+
+By default, \fBmkencap\fP will unpack the source archive directly without
+using any commands specified in the profile.  If the \fI<unpack>\fP
+element is present, \fBmkencap\fP will execute the specified commands
+instead of unpacking the source archive directly.
+
+See \fBCOMMAND ELEMENTS\fP below for more information on how the
+\fI<unpack>\fP commands are executed.
+.SS The <patch> Element
+Specifies a patch to be applied to the source files before building
+the package.  It may be specified zero or more times.  It supports the
+following attributes:
+.TP
+.I url
+Optional.  A whitespace-delimited list of one or more URLs where the
+patch can be downloaded.
+.TP
+.I options
+Options to pass to the patch command.  Defaults to "-p1".
+.TP
+.I from_dir
+Optional.  Subdirectory in which to execute the patch command.
+.PP
+The content of the \fI<patch>\fP element is the text of the patch file.
+It should be left empty if the "url" attribute is specified.
+
+Example:
+
+.RS
+.nf
+<patch
+  url="ftp://ftp.feep.net/pub/software/authsrv/openssh-3.4p1-tis-auth.diff"
+/>
+.fi
+.RE
+.SS The <configure> Element
+Specifies a set of shell commands to use to configure the source
+archives.  The following attributes are supported:
+.TP
+.I type	
+Optional.  Specifies how the contents should be interpretted.  If set
+to "prepend", the content is executed before the existing configuration
+action.  If set to "append", the content is executed after the existing
+configuration action.  If set to "set", the contents are executed instead
+of the existing configuration action.  If set to "unset", the configure
+action is unset.  The default is "set".
+.PP
+The configuration action is executed in the ${builddir} directory, which
+is created first if it doesn't exist.  The default configuration action
+is:
+
+.RS
+.nf
+${srcdir}/configure \\
+      --prefix="${ENCAP_SOURCE}/${ENCAP_PKGNAME}" \\
+      --sysconfdir="${ENCAP_TARGET}/etc"
+.fi
+.RE
+
+Example:
+
+.RS
+.nf
+<configure>
+   xmkmf
+   ${MAKE} includes
+</configure>
+.fi
+.RE
+
+See \fBCOMMAND ELEMENTS\fP below for more information on how the
+\fI<configure>\fP commands are executed.
+.SS The <build> Element
+Specifies a set of shell commands to use to build the source archives.
+The following attributes are supported:
+.TP
+.I type	
+Optional.  Specifies how the contents should be interpretted.  If set
+to "prepend", the content is executed before the existing build action.
+If set to "append", the content is executed after the existing build
+action.  If set to "set", the contents are executed instead of the
+existing build action.  If set to "unset", the build action is unset.
+The default is "set".
+.PP
+The build action is executed in the ${builddir} directory.  The default
+build action is:
+
+.RS
+${MAKE}
+.RE
+
+Example:
+
+.RS
+.nf
+<build type="append">
+   ${MAKE} certificate TYPE=dummy
+</build>
+.fi
+.RE
+
+See \fBCOMMAND ELEMENTS\fP below for more information on how the
+\fI<build>\fP commands are executed.
+.SS The <install> Element
+The \fI<install>\fP element specifies how the \fI<source>\fP instance that
+contains it should be installed.  It supports the following attributes:
+.TP
+.I type
+Optional.  Specifies how the contents should be interpretted.  If set to
+"prepend", the content is executed before the existing installation action.
+If set to "append", the content is executed after the existing installation
+action.  If set to "set", the contents are executed instead of the existing
+installation action.  If set to "unset", the install action is unset.
+The default is "set".
+.PP
+The installation action is executed in the ${builddir} directory.  The
+default installation action is:
+
+.RS
+.nf
+${MAKE} install sysconfdir="${ENCAP_SOURCE}/${ENCAP_PKGNAME}/etc"
+.fi
+.RE
+
+Example:
+
+.RS
+.nf
+<install type="append">
+   cp ssh_prng_cmds ${ENCAP_SOURCE}/${ENCAP_PKGNAME}/ssh_prng_cmds
+   cp moduli.out ${ENCAP_SOURCE}/${ENCAP_PKGNAME}/moduli
+</install>
+.fi
+.RE
+
+See \fBCOMMAND ELEMENTS\fP below for more information on how the
+\fI<install>\fP commands are executed.
+.SS The <clean> Element
+The \fI<clean>\fP element specifies how the \fI<source>\fP instance that
+contains it should be cleaned up.  It supports the following attributes:
+.TP
+.I type
+Optional.  Specifies how the contents should be interpretted.  If set
+to "prepend", the content is executed before the existing clean action.
+If set to "append", the content is executed after the existing clean
+action.  If set to "set", the contents are executed instead of the
+existing clean action.  If set to "unset", the clean action is unset.
+The default is "set".
+.PP
+The clean action is executed in the ${builddir} directory.  The
+default clean action is:
+
+.RS
+${MAKE} clean
+.RE
+
+Example:
+
+.RS
+<clean type="unset" />
+.RE
+
+See \fBCOMMAND ELEMENTS\fP below for more information on how the
+\fI<clean>\fP commands are executed.
+.SS The <prepackage> Element
+The \fI<prepackage>\fP element specifies a set of commands to be executed
+after every \fI<source>\fP element has been built and installed but befor the
+package has been created.  It supports the following attributes:
+.TP
+.I type
+Optional.  Specifies how the contents should be interpretted.  If set to
+"prepend", the content is executed before the existing prepackage action.
+If set to "append", the content is executed after the existing prepackage
+action.  If set to "set", the contents are executed instead of the existing
+prepackage action.  If set to "unset", the install action is unset.
+The default is "set".
+.PP
+The prepackage action is executed in the "${ENCAP_SOURCE}/${ENCAP_PKGNAME}"
+directory.  The default prepackage action is:
+
+.RS
+.nf
+find . -name lib -prune -o \\
+	\\( -perm -0100 -o -perm -0010 -o -perm -0001 \\) \\
+	-type f -print | xargs ${STRIP}
+.fi
+.RE
+
+Example:
+
+.RS
+<prepackage type="unset" />
+.RE
+
+See \fBCOMMAND ELEMENTS\fP below for more information on how the
+\fI<prepackage>\fP commands are executed.
+.SS The <include_file> Element
+This element describes an additional file to add to the package.  The
+following attributes are supported:
+.TP
+.I name
+Required.  The name of the file.  This must be a path name relative to
+the package directory.
+.TP
+.I owner
+Optional.  The owner of the installed file.
+.TP
+.I group
+Optional.  The group of the installed file.
+.TP
+.I mode
+Optional.  The mode of the installed file.  The default is 0644.
+.PP
+The content of the \fI<include_file>\fP element is the content of the file
+to install.  Note that a single leading newline will be stripped from
+the content to aid in readability.
+
+Example:
+
+.RS
+.nf
+<include_file name="bin/webconf.in" mode="0755">
+   (...contents of file...)
+</include_file>
+.fi
+.RE
+.SS The <encapinfo> Element
+This element contains the content of the encapinfo file to be created
+for the new package.  It supports no attributes.
+
+Note that the following encapinfo fields should \fBnot\fP be specified in an
+\fI<encapinfo>\fP element, since they will be determined dynamically by
+\fBmkencap\fP:
+.IP \(bu
+.B date
+.IP \(bu
+.B contact
+.IP \(bu
+.B platform
+.PP
+Example:
+
+.RS
+.nf
+<encapinfo>
+   exclude sbin/webconf.in
+</encapinfo>
+.fi
+.RE
+.SH COMMAND ELEMENTS
+For those elements that contain commands to be executed by \fBmkencap\fP,
+the commands are parsed and executed the same way that they would be in
+a Makefile.  In particular, there are a few things to bear in mind.
+
+First, each command is executed in its own subshell.  This means that
+process-specific actions like setting environment variables or changing
+directories will not propogate from one command to another.  For
+example, this element does not do what you might think:
+
+.RS
+.nf
+<!-- this will NOT work -->
+<configure>
+  cd src
+  ./configure
+</configure>
+.fi
+.RE
+
+Instead, you need to use something like this:
+
+.RS
+.nf
+<!-- this one will work -->
+<configure><![CDATA[
+  cd src && ./configure
+]]></configure>
+.fi
+.RE
+
+Generally, each line is interpretted as a single command.  If you need
+a single command to span multiple lines, you can use a backslash ("\\")
+to escape newlines.  For example:
+
+.RS
+.nf
+<configure>
+${srcdir}/configure \\
+	--prefix="${ENCAP_SOURCE}/${ENCAP_PKGNAME}" \\
+	--sysconfdir="${ENCAP_TARGET}/etc"
+</configure>
+.fi
+.RE
+
+Finally, \fBmkencap\fP will check the exit code of each command as it is
+executed.  If any command fails, the package creation process will abort
+immediately.  For example:
+
+.RS
+.nf
+<build>
+${MAKE}
+${MAKE} test
+</build>
+.fi
+.RE
+
+If the "${MAKE}" command fails, \fBmkencap\fP will terminate without
+executing "${MAKE} test".
+.SH PLATFORM CONDITIONALS
+In order to do conditional evaluation based on platform, the profile
+will be preprocessed with \fBm4\fP.  The following special \fBm4\fP
+macros have been written for this purpose:
+.IP \(bu
+.BI PLATFORM_IF_EQUAL( string )
+.IP \(bu
+.BI PLATFORM_IF_MATCH( regex )
+.IP \(bu
+.BI PLATFORM_ELSE_IF_EQUAL( string )
+.IP \(bu
+.BI PLATFORM_ELSE_IF_MATCH( regex )
+.IP \(bu
+.B PLATFORM_ELSE
+.IP \(bu
+.B PLATFORM_ENDIF
+.PP
+The \fB*_MATCH\fP macros check the platform name against a regular
+expression.  The \fB*_EQUAL\fP macros check the platform name against
+a constant string.
+
+Conditional blocks cannot be nested.  For example, this is illegal:
+
+.RS
+.nf
+<!-- This is illegal! -->
+PLATFORM_IF_EQUAL(rs6000-aix4.3.3)
+   --with-rundir=/etc
+PLATFORM_ELSE
+   PLATFORM_IF_MATCH(.*linux)
+      --with-rundir=/var/state
+   PLATFORM_ELSE
+      --with-rundir=/var/run
+   PLATFORM_ENDIF
+PLATFORM_ENDIF
+.fi
+.RE
+
+Instead, use a conditional block with multuple options:
+
+.RS
+.nf
+<!-- This is the right way to do it. -->
+PLATFORM_IF_EQUAL(rs6000-aix4.3.3)
+  --with-rundir=/etc
+PLATFORM_ELSE_IF_MATCH(.*linux)
+  --with-rundir=/var/state
+PLATFORM_ELSE
+  --with-rundir=/var/run
+PLATFORM_ENDIF
+.fi
+.RE
+
+Also, the normal \fBm4\fP quoting characters are "`" and "'".  Since these are
+frequently used in shell scripts, \fBm4\fP will be configured to use the
+strings "<|" and "|>" as quote delimiters instead.  You will not normally
+need to use these delimiters, but if you run into a situation where \fBm4\fP
+is expanding something that you do not want it to, you can quote the
+text that you do not want expanded.
+.SS ENVIRONMENT VARIABLES
+Because environment variable settings can affect the build process,
+\fBmkencap\fP will sanitize the environment in which the build commands
+are run.
+
+First, \fBmkencap\fP will initialize the environment to the settings
+found in the \fI/usr/local/etc/mkencap_environment\fP file.  Next,
+\fBmkencap\fP will process any \fI<environment>\fP elements found in the
+package profile.  And finally, \fBmkencap\fP will set the following
+environment variables:
+.TP
+.B ENCAP_PKGNAME
+The value of the \fIpkgspec\fP attribute of the \fI<encap_profile>\fP
+element.
+.TP
+.B ENCAP_SOURCE
+The Encap source directory.
+.TP
+.B ENCAP_TARGET
+The Encap target directory.
+.TP
+.B MKENCAP_DOWNLOAD_DIR
+The directory used by \fBmkencap\fP to store downloaded files.
+.TP
+.B MKENCAP_SRC_TREE
+The common source tree used by \fBmkencap\fP.
+.TP
+.B MKENCAP_BUILD_TREE
+The build tree used by \fBmkencap\fP.
+.PP
+In addition, the following variables will be set on a per-\fI<source>\fP
+basis:
+.TP
+.B srcdir
+The full path to the unpacked sources, based on the \fIsubdir\fP and
+\fIuse_objdir\fP attributes for the \fI<source>\fP and the number of
+sources in the package.
+.TP
+.B builddir
+The full path to the build directory, based on the \fIsubdir\fP attribute
+for the \fI<source>\fP and the number of sources in the package.
+.PP
+All of these environment variables are available for use in shell
+commands.
+.SH SEE ALSO
+.BR mkencap (1),
+.BR m4 (1)

@@ -1,0 +1,106 @@
+# @configure_input@
+
+### Path settings
+srcdir		= @srcdir@
+top_srcdir	= @top_srcdir@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+bindir		= @bindir@
+datadir		= @datadir@
+sysconfdir	= @sysconfdir@
+
+PACKAGE_NAME	= @PACKAGE_NAME@
+PACKAGE_VERSION	= @PACKAGE_VERSION@
+
+@ENCAP_DEFS@
+
+### Installation programs and flags
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s
+INSTALL_DATA	= @INSTALL_DATA@
+LN_S		= @LN_S@
+MKDIR		= @MKDIR@
+
+### Compiler and link options
+CC		= @CC@
+CPPFLAGS	= -I.. \
+		  -I${srcdir} \
+		  -I${top_srcdir}/lib \
+		  -I${top_srcdir}/compat \
+		  -I${top_srcdir}/common \
+		  -I../listhash \
+		  -I../pathcode \
+		  @CURL_CFLAGS@ \
+		  @CPPFLAGS@
+CFLAGS		= @CFLAGS@
+LDFLAGS		= @LDFLAGS@
+LIBS		= @LIBS@ @CURL_LIBS@
+@SET_MAKE@
+VPATH		= @srcdir@:../pathcode:@top_srcdir@/common
+
+MKENCAP_DEFAULTS = -DPLATFORM=\"`../lib/printplatform`\"
+
+
+### Makefile rules - no user-servicable parts below
+
+MKENCAP_OBJS	= addfiles.o \
+		  archive.o \
+		  build.o \
+		  compression.o \
+		  download.o \
+		  encap_gsub.o \
+		  encap_mkdirhier.o \
+		  encap_rmtree.o \
+		  environment.o \
+		  init.o \
+		  mkencap.o \
+		  profile_elements.o \
+		  profile_parse.o \
+		  writeinfo.o
+MKENCAP_HDRS	= ../config.h \
+		  ${srcdir}/mkencap.h \
+		  ${top_srcdir}/common/archive.h \
+		  ${top_srcdir}/common/compression.h \
+		  ${top_srcdir}/common/download.h \
+		  ${top_srcdir}/common/init.h \
+		  ${top_srcdir}/lib/encap.h \
+		  ${top_srcdir}/compat/compat.h \
+		  ../listhash/encap_listhash.h \
+		  ../pathcode/encap_pathcode.h
+MKENCAP_LIBS	= ../lib/libencap.a
+ALL		= mkencap
+
+
+all: ${ALL}
+
+.PHONY: clean distclean install
+
+mkencap: ${MKENCAP_OBJS} ${MKENCAP_LIBS}
+	${CC} ${CFLAGS} ${LDFLAGS} -o mkencap ${MKENCAP_OBJS} ${MKENCAP_LIBS} ${LIBS}
+
+${MKENCAP_OBJS}: ${MKENCAP_HDRS}
+
+mkencap.o: ${srcdir}/mkencap.c #../lib/printplatform
+	${CC} ${CFLAGS} ${CPPFLAGS} ${MKENCAP_DEFAULTS} -c -o $@ $<
+
+profile_parse.o: ${srcdir}/profile_parse.c
+	${CC} ${CFLAGS} ${CPPFLAGS} -DDATADIR=\"${datadir}\" -c -o $@ $<
+
+environment.o: ${srcdir}/environment.c
+	${CC} ${CFLAGS} ${CPPFLAGS} -DSYSCONFDIR=\"${sysconfdir}\" -c -o $@ $<
+
+.c.o:
+	${CC} ${CFLAGS} ${CPPFLAGS} -c -o $@ $<
+
+clean:
+	rm -f *~ *.o ${ALL} core
+
+distclean: clean
+	rm -f Makefile
+
+install:
+	${MKDIR} ${DESTDIR}${bindir}
+	${INSTALL_PROGRAM} mkencap ${DESTDIR}${bindir}
+	${MKDIR} ${DESTDIR}${datadir}
+	${INSTALL_DATA} ${srcdir}/mkencap.m4 ${DESTDIR}${datadir}
+

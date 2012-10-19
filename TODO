@@ -1,0 +1,83 @@
+FIXME:
+------
+
+* mkencap profile code can't invoke bzip2 to unpack .bz2 source archives
+  because PATH is overridden by environment-sanitizing code
+* add mkencap option to differentiate between client and server
+  (e.g., if a profile has two <source>s, one of which has
+  use_objdir="no", we want to be able to install patches for that one
+  but not touch the code in the shared source tree)
+* should build_subdir affect ${srcdir} value?
+  (e.g., think about a <source> where the configure script is in a
+  subdir, but we're building in an objdir.  we want ${srcdir} to point
+  directly to the subdir in the source tree so that we can find the
+  configure script as "${srcdir}/configure", but we don't necessarily
+  want to build in a subdir of the build tree)
+
+* epkg bug: ELOOP returned when removing an Encap link to a package file
+  when the package file is a self-referential symlink:
+---------------------------------------------------------------------------
+  > removing package openssl-0.9.7c
+    > ssl: excluding
+    ! encap_check_target: Too many levels of symbolic links
+    ! removal failed
+---------------------------------------------------------------------------
+  also: error message should include name of file
+  (was actually man/man3/EVP_BytesToKey.3)
+
+
+
+
+* Encap 3.0:
+  * new module-based library API
+  * possible module ideas:
+    * facility for combining common files
+      (perl's module inventory, info/dir, etc)
+    * library prereq checking
+    * "command" prereq type - checks path for executable binary?
+    * maintain multiple branches of the same package in parallel
+      (e.g., ncftp-1.x and ncftp-2.x)
+    * report and/or log statistics on number of links created, etc
+    * support list of directories which cannot be specified as linkdirs
+    * check for ENOSPC and run a grow-filesystem command, just like fget
+    * estimate space needed for install and verify that there's enough
+      free space before starting installation
+  * package prereqs should make sure the required package is actually installed
+  * dynamic path library (?)
+  * detect when target directory is a symlink to change number of '../' in link
+    (/usr/local/share/pixmaps -> /usr/local/include/X11/pixmaps)
+  * investigate Linux ldconfig problem?
+  * add requirement for removal scripts?
+* epkg:
+  * don't say "(replaced link to non-existant package XXX)" if package
+    exists but the specific file doesn't exist
+  * keep list of deleted files for -n to detect empty directories?
+  * new mode to purge/expunge old versions from source directory
+  * re-order package installs if prereqs are selected after the package
+    they're a prereq for
+  * automatically install prerequisites in update mode
+  * if updating epkg, do so before updating any other packages, and then
+    reinvoke the new epkg to process the remaining packages
+  * fix hash function to provide accurate alphabetizing
+  * if linkname directive specifies a directory, need to rename path for
+    files under that directory!
+  * use same interface for encap_find_versions() and find_update_versions() ?
+* mkencap:
+  * generate dependancy list
+  * option to add encapinfo file to tarfile, not to source dir
+  * FTP/HTTP upload support for automatic submission to Encap Archive?
+  * use DESTDIR for package creation?
+  * maybe: combine patch and unpack into a single mode?
+    combine configure and build into a single mode?
+  * forcibly clean up existing files before executing commands for a given mode?
+  * when downloading <source> archives, if the file already exists locally,
+    check to make sure that it's the right size and date before moving on
+  * find a better solution for profile preprocessing that doesn't
+    require GNU m4
+* code cleanup:
+  * add common output function to handle __progname and verbose variables?
+* autoconf:
+  * add macro to produce "config summary" at the end of configure output
+* doc:
+  * add encapinfo(5) manpage ?
+

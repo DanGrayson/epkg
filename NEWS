@@ -1,0 +1,23 @@
+User-visible changes from 2.2.x to 2.3.x:
+-----------------------------------------
+
+* added HTTP download support using cURL (see README file for details)
+
+* added automatic reconnection if FTP server times out between
+  downloads; use "-T" option to disable
+
+* new package profile format used by mkencap for automated package creation
+  (see encap_profile(5) man page for explanation of the profile format)
+  (requires libexpat to be installed at build time and GNU m4 to be
+  installed at run-time; see README for details)
+
+* removed mkencap directory creation mode ("mkencap -i")
+
+* many changes to mkencap command line interface
+
+* added encapinfo_parse_directive() to libencap API
+
+* changed Encap 2.1 platform name for HP-UX from "pa1.1-hpux11.00"
+  to "pa-hpux11.00"
+  (encap_platform_compat() will still recognize the old name)
+

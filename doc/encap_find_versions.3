@@ -1,0 +1,24 @@
+.TH encap_find_versions 3 "Oct 2002" "University of Illinois" "C Library Calls"
+.SH NAME
+encap_find_versions \- scan source directory for all versions of a given package
+.SH SYNOPSIS
+.B #include <encap.h>
+.P
+.B typedef int (*verfunc_t)(void *, char *, char *);
+.br
+.BI "int encap_find_versions(char *" source ", char *" pkgname ","
+.BI "verfunc_t " verfunc ", void *" state ");"
+.SH VERSION
+This man page documents version 2.3 of \fBlibencap\fP.
+.SH DESCRIPTION
+The \fBencap_find_versions\fP() function scans the Encap Source directory
+\fIsource\fP for all versions of package \fIpkgname\fP.  For each version
+which is found, the function pointed to by \fIverfunc\fP is called.  If
+\fIverfunc\fP returns -1, \fBencap_find_versions\fP() returns immediately.
+.SH RETURN VALUES
+On success, the \fBencap_find_versions\fP() function returns the number of
+versions found.  If \fIverfunc\fP returns -1, \fBencap_find_versions\fP()
+returns -2.  On other errors, \fBencap_find_versions\fP() returns -1
+and sets the global variable \fIerrno\fP.
+.SH SEE ALSO
+.BR encap_vercmp (3)

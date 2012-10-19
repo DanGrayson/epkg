@@ -1,0 +1,32 @@
+.TH encap_pkgspec_parse 3 "Oct 2002" "University of Illinois" "C Library Calls"
+.SH NAME
+encap_pkgspec_parse, encap_pkgspec_join \- process Encap pkgspecs
+.SH SYNOPSIS
+.B #include <encap.h>
+.P
+.BI "int encap_pkgspec_parse(char *" pkgspec ", char *" name ","
+.BI "size_t " nlen ", char *" ver ","
+.BI "size_t " vlen ", char *" platform ","
+.BI "size_t " plen ", char *" extension ","
+.BI "size_t " elen ");"
+
+.BI "int encap_pkgspec_join(char *" buf ", size_t " buflen ","
+.BI "char *" name ", char *" ver ");"
+.SH VERSION
+This man page documents version 2.3 of \fBlibencap\fP.
+.SH DESCRIPTION
+The \fBencap_pkgspec_parse\fP() function splits up \fIpkgspec\fP into
+its component parts.  If \fIname\fP is not NULL, it points to a buffer
+of size \fInlen\fP to which the package name is written.  If \fIver\fP
+is not NULL, it points to a buffer of size \fIvlen\fP to which the
+package version is written.  If \fIplatform\fP is not NULL, it points to
+a buffer of size \fIplen\fP to which the package's platform is written.
+If \fIextension\fP is not NULL, it points to a buffer of size \fIelen\fP
+to which the package's extension is written.
+
+The \fBencap_pkgspec_join\fP() function combines \fIname\fP and
+\fIver\fP to form a new pkgspec.  The new pkgspec is written to the
+buffer \fIbuf\fP with length \fIbuflen\fP.
+.SH RETURN VALUES
+The \fBencap_pkgspec_parse\fP() and \fBencap_pkgspec_join\fP() functions
+return 0 on success, or -1 on error (and set \fIerrno\fP).

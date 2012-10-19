@@ -1,0 +1,113 @@
+# @configure_input@
+
+### Path settings
+srcdir		= @srcdir@
+top_srcdir	= @top_srcdir@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+mandir		= @mandir@
+docdir		= @prefix@/doc
+
+PACKAGE_NAME	= @PACKAGE_NAME@
+PACKAGE_VERSION	= @PACKAGE_VERSION@
+
+@ENCAP_DEFS@
+
+### Installation programs and flags
+INSTALL		= @INSTALL@
+INSTALL_DATA	= @INSTALL_DATA@
+LN_S		= @LN_S@
+MKDIR		= @MKDIR@
+@SET_MAKE@
+
+
+### Makefile rules - no user-servicable parts below
+
+ENCAP_CHECK_TARGET_SO	= encap_check_source
+ENCAP_HASH_NEW_SO	= encap_hash_free \
+			  encap_hash_next \
+			  encap_hash_prev \
+			  encap_hash_search \
+			  encap_hash_add \
+			  encap_hash_getkey \
+			  encap_hash_del
+ENCAP_INSTALL_SO	= encap_remove \
+			  encap_check
+ENCAP_LIST_NEW_SO	= encap_list_free \
+			  encap_list_next \
+			  encap_list_prev \
+			  encap_list_search \
+			  encap_list_add \
+			  encap_list_add_str \
+			  encap_list_del \
+			  encap_list_dup \
+			  encap_list_merge
+ENCAP_OPEN_SO		= encap_close
+ENCAP_PKGSPEC_PARSE_SO	= encap_pkgspec_join
+ENCAP_PLATFORM_NAME_SO	= encap20_platform_name \
+			  encap_platform_split \
+			  encap_platform_compat
+ENCAPINFO_WRITE_SO	= encapinfo_init \
+			  encapinfo_free \
+			  encapinfo_parse_directive
+
+DISTCLEANFILES		= ../listhash/encap_hash_new.3 \
+			  ../listhash/encap_list_new.3
+
+
+all:
+
+.PHONY: clean distclean install
+
+clean:
+
+distclean: clean
+	rm -f Makefile ${DISTCLEANFILES}
+
+install: all
+	${MKDIR} ${DESTDIR}${mandir}/man1
+	${INSTALL_DATA} ${srcdir}/epkg.1 ${DESTDIR}${mandir}/man1
+	${INSTALL_DATA} ${srcdir}/mkencap.1 ${DESTDIR}${mandir}/man1
+	${MKDIR} ${DESTDIR}${mandir}/man3
+	${INSTALL_DATA} ${srcdir}/encap_check_prereqs.3 ${DESTDIR}${mandir}/man3
+	${INSTALL_DATA} ${srcdir}/encap_check_target.3 ${DESTDIR}${mandir}/man3
+	for i in ${ENCAP_CHECK_TARGET_SO}; do \
+		echo ".so man3/encap_check_target.3" > ${DESTDIR}${mandir}/man3/$${i}.3; \
+	done
+	${INSTALL_DATA} ${srcdir}/encap_find_versions.3 ${DESTDIR}${mandir}/man3
+	${INSTALL_DATA} ../listhash/encap_hash_new.3 ${DESTDIR}${mandir}/man3
+	for i in ${ENCAP_HASH_NEW_SO}; do \
+		echo ".so man3/encap_hash_new.3" > ${DESTDIR}${mandir}/man3/$${i}.3; \
+	done
+	${INSTALL_DATA} ${srcdir}/encap_install.3 ${DESTDIR}${mandir}/man3
+	for i in ${ENCAP_INSTALL_SO}; do \
+		echo ".so man3/encap_install.3" > ${DESTDIR}${mandir}/man3/$${i}.3; \
+	done
+	${INSTALL_DATA} ../listhash/encap_list_new.3 ${DESTDIR}${mandir}/man3
+	for i in ${ENCAP_LIST_NEW_SO}; do \
+		echo ".so man3/encap_list_new.3" > ${DESTDIR}${mandir}/man3/$${i}.3; \
+	done
+	${INSTALL_DATA} ${srcdir}/encap_open.3 ${DESTDIR}${mandir}/man3
+	for i in ${ENCAP_OPEN_SO}; do \
+		echo ".so man3/encap_open.3" > ${DESTDIR}${mandir}/man3/$${i}.3; \
+	done
+	${INSTALL_DATA} ${srcdir}/encap_pkgspec_parse.3 ${DESTDIR}${mandir}/man3
+	for i in ${ENCAP_PKGSPEC_PARSE_SO}; do \
+		echo ".so man3/encap_pkgspec_parse.3" > ${DESTDIR}${mandir}/man3/$${i}.3; \
+	done
+	${INSTALL_DATA} ${srcdir}/encap_platform_name.3 ${DESTDIR}${mandir}/man3
+	for i in ${ENCAP_PLATFORM_NAME_SO}; do \
+		echo ".so man3/encap_platform_name.3" > ${DESTDIR}${mandir}/man3/$${i}.3; \
+	done
+	${INSTALL_DATA} ${srcdir}/encap_vercmp.3 ${DESTDIR}${mandir}/man3
+	${INSTALL_DATA} ${srcdir}/encapinfo_write.3 ${DESTDIR}${mandir}/man3
+	for i in ${ENCAPINFO_WRITE_SO}; do \
+		echo ".so man3/encapinfo_write.3" > ${DESTDIR}${mandir}/man3/$${i}.3; \
+	done
+	${MKDIR} ${DESTDIR}${mandir}/man5
+	${INSTALL_DATA} ${srcdir}/encap_profile.5 ${DESTDIR}${mandir}/man5
+	${MKDIR} ${DESTDIR}${docdir}/encap
+	${INSTALL_DATA} ${srcdir}/encap2.0-specification.txt ${DESTDIR}${docdir}/encap
+	${INSTALL_DATA} ${srcdir}/encap2.1-specification.txt ${DESTDIR}${docdir}/encap
+	${INSTALL_DATA} ${srcdir}/encap_profile.dtd ${DESTDIR}${docdir}/encap
+

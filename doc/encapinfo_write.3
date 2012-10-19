@@ -1,0 +1,35 @@
+.TH encapinfo_write 3 "Oct 2002" "University of Illinois" "C Library Calls"
+.SH NAME
+encapinfo_init, encapinfo_write, encapinfo_free, encapinfo_parse_directive \- Encap package creation routines
+.SH SYNOPSIS
+.B #include <encap.h>
+.P
+.BI "int encapinfo_init(encapinfo_t *" pkginfo ");"
+
+.BI "int encapinfo_write(char *" outfile ", encapinfo_t *" pkginfo ");"
+
+.BI "int encapinfo_free(encapinfo_t *" pkginfo ");"
+
+.BI "int encapinfo_parse_directive(char *" text ", encapinfo_t *" pkginfo ","
+.BI "char *" effbuf ", size_t" errsz ");"
+.SH VERSION
+This man page documents version 2.3 of \fBlibencap\fP.
+.SH DESCRIPTION
+The \fBencapinfo_init\fP() function initializes data structures within
+\fIpkginfo\fP.
+
+The \fBencapinfo_write\fP() function writes the package description data
+from \fIpkginfo\fP into the file named by \fIoutfile\fP.
+
+The \fBencapinfo_free\fP() function frees memory associated with \fIpkginfo\fP.
+
+The \fBencapinfo_parse_directive\fP() function parses a \fIencapinfo\fP
+directive and encodes the directive in \fIpkginfo\fP.  On error, a
+human-readable error message is written to the buffer pointed to by
+\fIerrbuf\fP, which must be at least of size \fIerrsz\fP.
+.SH RETURN VALUES
+The \fBencapinfo_init\fP() and \fIfBencapinfo_write\fP() functions return 0
+on success, or -1 on failure (and set \fIerrno\fP).
+
+The \fBencapinfo_parse_directive\fP() function returns 0 on success
+and -1 on error.

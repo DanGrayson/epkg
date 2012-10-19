@@ -1,0 +1,353 @@
+Encap Development Group				M. Roth
+Encap 2.1 Specification				University of Illinois
+						February 2002
+
+
+                       Encap Package Format 2.1
+
+
+0. Status of this Memo
+
+   This document specifies a standard package format for the Encap
+   community, and requests discussion and suggestions for improvements.
+   Distribution of this memo is unlimited.
+
+1. Introduction
+
+1.1. Scope
+
+   This document amends the original Encap package format specification
+   [1].  It introduces a new version of the package format which changes
+   several existing features.
+
+1.2. Notational Conventions
+
+1.2.1. Requirements Notation
+
+   This document makes use of the document conventions defined in BCP14
+   [2].  That provides the interpretation of capitalized imperative
+   words like MUST, SHOULD, etc.
+
+1.2.2. Syntactic Notation
+
+   In syntax descriptions, text enclosed in '<' (less-than, ASCII 60) and
+   '>' (greater-than, ASCII 62) characters represents a variable which gets
+   replaced by a specific piece of information.  Text enclosed in '['
+   (left-bracket, ASCII 91) and ']' (right-bracket, ASCII 93) characters
+   denotes optional componants.  All other text should be taken literally.
+
+2. Encap 2.1 Specification
+
+   The Encap 2.1 package format is the same as the Encap 2.0 format
+   specified in [1], except for the changes noted in this section.
+
+2.1. Package Names and Versions
+
+   As indicated in section 3.1 of [1], each Encap 2.0 package's name is
+   a unique identifier, called a pkgspec.  For Encap 2.1 packages, the
+   format of the pkgspec is as follows:
+
+      <pkgname>-<swver>[+<pkgver>]
+
+   It should be noted that the first two components of the Encap 2.1
+   pkgspec are mandatory.
+
+2.1.1. Package Name
+
+   In this format, <pkgname> is a label common to all versions of the
+   package.  It MAY contain any printable-ASCII character except for
+   '/' (slash, ASCII 47).
+
+2.1.2. Software Version
+
+   The <swver> tag represents the version of the software that
+   the package is based on.  It is composed of one or more substrings,
+   delimited by the '.' (period, ASCII 46) character.  Each substring MAY
+   contain any printable-ASCII character except for '/' (slash, ASCII 47),
+   '-' (dash, ASCII 45), '.' (period, ASCII 46), and '+' (plus, ASCII 43).
+   This specification places no limit on the number or size of the version
+   substrings.
+
+   The software version SHOULD be identical to the version string used
+   by the maintainer of the original software.
+
+2.1.3. Package Version
+
+   The <pkgver> tag represents the version of the package itself, which is
+   independent of the version of the software which the package is based
+   on.  The syntax of <pkgver> is identical to that of the <swver> tag,
+   but <pkgver> SHOULD consist of a single numeric substring.
+
+2.2. README Files
+
+   Section 3.3 of [1] implies that the README file should be displayed
+   any time the package is processed, regardless of what operation is
+   being performed on it.  For Encap 2.1 packages, the package manager
+   SHOULD display the README file when the package is being installed.
+   It SHOULD NOT display the README file when other operations are
+   performed.
+
+2.3. Guidelines for Package Scripts
+
+   Package scripts in Encap 2.1 packages MUST adhere to the guidelines
+   specified in section 3.4.3 of [1], except where they conflict with
+   the changes documented in this section.
+
+2.3.1. Environment Variables
+
+   The package manager MUST set the following environment variables
+   before invoking a package script:
+
+      Variable		Value
+      ----------------------------------------------------------
+      ENCAP_SOURCE	Encap source directory
+      ENCAP_TARGET	Encap target directory
+      ENCAP_PKGNAME	Full pkgspec of the current package
+
+2.3.2. Backing Up Pre-Existing Files
+
+   A package script which modifies or replaces pre-existing files MUST
+   always save a copy with the suffix ".pre.<pkgspec>.<date>", where
+   <pkgspec> is the pkgspec of the package being installed and <date>
+   is the exact time and date that the file was updated.  The format of
+   the <date> string is identical to that produced by the strftime(3)
+   library call with the format string "%Y-%m-%d.%H:%M:%S".
+
+2.3.3. Undoing Changes During Removal
+
+   If a preinstall or postinstall script makes system changes when
+   installing an Encap 2.1 package, the preremove or postremove script
+   for that package SHOULD undo all such changes, unless local modifications
+   have been made since package installation.
+
+   For example, if the postinstall script adds an rc script to run a
+   program included in the package, the preremove script must remove
+   the rc script, unless the rc script has been modified since the
+   postinstall script originally added it.
+
+2.4. Comment Syntax
+
+   No syntax is defined in [1] for embedding comments in an encapinfo
+   file.  In an Encap 2.1 encapinfo file, any text beginning with a '#'
+   (pound, ASCII 35) character and ending with a newline (ASCII 13)
+   character is considered a comment and MUST be ignored.  Note that
+   the pound character loses this special meaning when it is directly
+   preceded by a '\' (backslash, ASCII 92) character.
+
+2.5. Platform Names
+
+   The platform name described in section 3.5.1.1 of [1] is not valid
+   for Encap 2.1 packages.  Instead, platform names are described
+   using this syntax:
+
+      <base_platform>[-<platform_suffix>]
+
+2.5.1. Base Platform Names
+
+   The <base_platform> component MUST be present.  It is composed of
+   the following sub-components:
+
+      <architecture>-<operatingsystem><osversion>
+
+   In this syntax, <architecture> represents the underlying hardware
+   platform, <operatingsystem> represents the name of the operating
+   system, and <osversion> represents the version of the operating system.
+   Each sub-component MAY contain any printable-ASCII character except for
+   '/' (slash, ASCII 47) or '-' (dash, ASCII 45).
+
+   This document does not mandate the precise contents of the
+   <base_platform> component.  The intent is that platform names will be
+   established by convention.  However, the <base_platform> component
+   MUST be generated automatically using system calls provided by the
+   operating system.
+
+2.5.2. Optional Platform Suffix
+
+   The optional <platform_suffix> component can be used to specify
+   additional detail when necessary.  It MAY contain any printable-ASCII
+   character except for '/' (slash, ASCII 47) or '-' (dash, ASCII 45).
+
+   This document does not mandate the precise contents of the
+   <platform_suffix> component.  The intent is that platform suffixes will
+   be established by convention as needed to subcategorize systems of a
+   common base platform based on portability constraints.
+
+2.5.3. Level of Detail
+
+   It should be noted that the purpose of encoding the platform is
+   to provide a basic set of prerequisite assumptions.  As a result,
+   the Encap platform specification for a given platform MUST include
+   enough information to uniquely identify the platform, but SHOULD
+   NOT include any information beyond that.
+   
+   Practically speaking, the platform name should be used to differentiate
+   between two packages of the same software which must be used on
+   different machines.  Two packages of the same software should not
+   have different package names if they run on the same set of machines
+   (in which case, they're exactly the same anyway).  The following
+   examples illustrate this point more explicity:
+
+   Example 1: RS/6000 Systems
+
+      For RS/6000 systems running AIX 4.3.3, the base platform name is
+      "rs6000-aix4.3.3".  This is sufficient for most RS/6000 systems,
+      since most code is portable between them.  However, code
+      which is generated using the instruction set of the newer PowerPC
+      processors cannot run on older POWER or POWER-2 systems.  As a
+      result, the platform name for a package containing PowerPC-specific
+      code might be "rs6000-aix4.3.3-ppc".  Further granularity based
+      on the specific processor model is not desirable, because the only
+      important difference is the instruction set issue.
+
+   Example 2: Linux Systems
+
+      On Linux systems, it is desirable to know the first two substrings
+      of the kernel version, since code built for that kernel version may
+      not work on older kernels.  However, no granularity is needed on
+      the third substring, since code compiled for a given kernel should
+      work on any other kernel in the same series.  Thus, on a Linux
+      2.2.16 system, the base platform name would be "ix86-linux2.2",
+      not "ix86-linux2.2.16".
+
+      In addition, modern Linux systems use the GNU C library (glibc).
+      However, different versions of glibc have slightly different
+      interfaces with slightly different behavior.  Packages built
+      for a particular version of glibc may not work properly with a
+      different version.  As a result, the platform name for a package
+      built for a specific version of glibc might be
+      "ix86-linux2.2-glibc2.0".
+
+   Example 3: Solaris Systems
+
+      Modern Solaris systems run in 64-bit mode, but older systems run
+      in 32-bit mode.  Most 32-bit code runs fine in 64-bit mode, so the
+      normal package name would be simply "sparc-solaris8".  However,
+      64-bit code cannot run on 32-bit systems, so the platform name for
+      those packages would be "sparc-solaris8-64bit".  There are also
+      some packages that depend on kernel-specific data (such as lsof),
+      such that the 32-bit version will not run on a 64-bit machine;
+      for these packages, the platform name would be "sparc-solaris8-32bit".
+
+2.5.4. Platform-Independent Packages
+
+   Some packages will consist solely of platform-independent scripts
+   and data.  The platform name for these packages is the special token
+   "share".
+
+   Note that platform suffixes (described in section 2.5.2 above) MUST
+   NOT be used with this special platform name.
+
+2.5.5. Determining Platform Compatibility
+
+   An Encap 2.1 package manager MUST check the platform of each package
+   at installation time to ensure that it is compatible with the system
+   it is being installed on.  If the package will not run on the system,
+   the package manager MUST refuse to install it by default.  However,
+   the package manager MUST allow the administrator to override this
+   verification.
+
+   An Encap 2.1 package MUST have a platform name specified in its
+   encapinfo file.  To determine whether a package is compatible with
+   the system it is being installed on, two things are checked.  First,
+   the package's base platform name MUST match the host's platform name.
+   Second, if the package has a platform suffix, that suffix MUST be
+   explicitly allowed by the administrator.
+
+2.6. Recommended Directory Structure
+
+   The following directory structure is recommended for all Encap 2.1
+   packages:
+
+      DIRECTORY			PURPOSE
+      ---------------------------------------------------------
+      bin			programs executed by users
+      sbin			programs executed by root
+      lib			C libraries (both shared and static)
+      include			C header files
+      share			architecture-independent data
+      libexec			programs executed only by other programs
+
+   For more information, see the Filesystem Hierarchy Standard [3].
+
+2.6.1. Configuration File Placement
+
+   Because it is desirable to maintain locally-modified configuration
+   files when upgrading a package, Encap 2.1 packages which read local
+   configuration files or have directories for site-local customizations
+   MUST NOT look for these files directly inside the package directory.
+   Also, Encap 2.1 packages SHOULD NOT include files to be linked into the
+   "etc" subdirectory of the Encap target directory.  Instead of creating
+   links, the package scripts should be used to place the appropriate
+   configuration files directly under the Encap target directory,
+   subject to the restrictions placed on them in the "Guidelines for
+   Package Scripts" section.
+
+2.7. Package Archives
+
+   Archives of Encap 2.1 packages are distributed in GNU tar format, and
+   are optionally compressed.
+
+2.7.1. Archive Contents
+
+   When creating an Encap 2.1 package archive, the encapinfo file SHOULD
+   be the first entry in the tar archive after the entry for the package
+   directory itself.  This specification strongly discourages the
+   encapinfo file from being placed further into the archive, since the
+   package manager may need to read the encapinfo file to determine the
+   prerequisites of the package before the archive is completely
+   extracted.  However, if the encapinfo file is placed further into the
+   archive, the package manager MUST process it correctly.
+
+2.7.2. Archive Names
+
+   Archives of Encap 2.1 packages MUST be named using this syntax:
+
+      <pkgspec>-encap-<platform>.<format>
+
+   In this syntax, <pkgspec> is the pkgspec (as described in section 3.1
+   above), <platform> is the platform name (as described in section 3.5
+   above), and <format> is the normal extension of the archive file
+   format (for example, ".tar.gz" for a tar archive compressed with
+   gzip).
+
+   Using this syntax, an archive of the "epkg-3.0" package for AIX 4.3.3
+   might be called:
+
+      epkg-3.0+0-encap-rs6000-aix4.3.3.tar.gz
+
+3. References
+
+   [1]  Roth, M., Encap Package Format Specification, August 1999
+
+   [2]  Bradner, S., "Key words for use in RFCs to Indicate
+        Requirement Levels", BCP 14, RFC 2119, March 1997
+
+   [3]  Quinlain, D. and Russell, R., Filesystem Hierarchy Standard,
+        http://www.pathname.com/fhs/, version 2.2, May 2001
+
+4. Acknowledgements
+
+   The following people are among those who have contributed to this
+   document:
+
+	Jim Knoble <jmknoble@pobox.com>
+	Alex Lovell-Troy <alovell@uiuc.edu>
+	Geoff Raye <geoff@raye.com>
+	Dave Terrell <dbt@meat.net>
+	Chuck Thompson <cthomp@cs.uiuc.edu>
+	Melissa Woo <m-woo@uiuc.edu>
+
+   Apologies are offered to any inadvertently omitted.
+
+5. Author's Address
+
+   Mark D. Roth
+   University of Illinois at Urbana-Champaign
+   Computing and Communications Services Office
+   1304 W. Springfield Ave. M/C 256
+   Urbana, IL 61801
+   Phone: 1-217-244-5549
+   Email: roth@uiuc.edu
+
+
+

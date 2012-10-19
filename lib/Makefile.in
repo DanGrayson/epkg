@@ -1,0 +1,114 @@
+# @configure_input@
+
+### Path settings
+srcdir		= @srcdir@
+top_srcdir	= @top_srcdir@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+bindir		= @bindir@
+mandir		= @mandir@
+libdir		= @libdir@
+includedir	= @includedir@
+
+PACKAGE_NAME	= @PACKAGE_NAME@
+PACKAGE_VERSION	= @PACKAGE_VERSION@
+
+@ENCAP_DEFS@
+
+### Installation programs and flags
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s
+INSTALL_DATA	= @INSTALL_DATA@
+LN_S		= @LN_S@
+MKDIR		= @MKDIR@
+
+### Compiler and link options
+CC		= @CC@
+CPPFLAGS	= -I.. \
+		  -I${srcdir} \
+		  -I${top_srcdir}/compat \
+		  -I../listhash \
+		  -I../pathcode \
+		  @CPPFLAGS@
+CFLAGS		= @CFLAGS@
+AR		= @AR@
+RANLIB		= @RANLIB@
+LIBOBJS		= @LIBOBJS@
+LDFLAGS		= @LDFLAGS@
+LIBS		= @LIBS@
+@SET_MAKE@
+VPATH		= @srcdir@:@top_srcdir@/compat:../listhash:../pathcode
+
+
+### Makefile rules - no user-servicable parts below
+
+LIBENCAP_OBJS	= check_pkg.o \
+		  clean_target.o \
+		  encap_cleanpath.o \
+		  encap_relativepath.o \
+		  encapinfo.o \
+		  encap_hash.o \
+		  encap_list.o \
+		  handle.o \
+		  install_pkg.o \
+		  linkinfo.o \
+		  package.o \
+		  pkgspec.o \
+		  platform.o \
+		  prereq.o \
+		  recursion.o \
+		  remove_pkg.o \
+		  util.o \
+		  vercmp.o \
+		  version.o
+
+LIBENCAP_HDRS	= ../config.h \
+		  ${srcdir}/encap.h \
+		  ${srcdir}/internal.h \
+		  ${top_srcdir}/compat/compat.h \
+		  ../pathcode/encap_pathcode.h \
+		  ../listhash/encap_listhash.h
+
+ALL		= libencap.a \
+		  printplatform
+
+DISTCLEANFILES	= ../pathcode/encap_pathcode.h \
+		  ../pathcode/encap_cleanpath.c \
+		  ../pathcode/encap_gsub.c \
+		  ../pathcode/encap_relativepath.c \
+		  ../pathcode/encap_rmtree.c \
+		  ../pathcode/encap_mkdirhier.c \
+		  ../listhash/encap_listhash.h \
+		  ../listhash/encap_list.c \
+		  ../listhash/encap_hash.c
+
+
+all: ${ALL}
+
+.PHONY: clean distclean install
+
+libencap.a: ${LIBENCAP_OBJS} ${LIBOBJS}
+	${AR} rc libencap.a ${LIBENCAP_OBJS} ${LIBOBJS}
+	${RANLIB} libencap.a
+
+printplatform: printplatform.o libencap.a
+	${CC} ${CFLAGS} ${LDFLAGS} -o printplatform printplatform.o libencap.a ${LIBS}
+
+${LIBENCAP_OBJS}: ${LIBENCAP_HDRS}
+
+.c.o:
+	${CC} ${CFLAGS} ${CPPFLAGS} -c -o $@ $<
+
+clean:
+	rm -f *~ *.o ${ALL} core
+
+distclean: clean
+	rm -f Makefile ${DISTCLEANFILES}
+
+install:
+	${MKDIR} ${DESTDIR}${libdir}
+	${INSTALL_DATA} libencap.a ${DESTDIR}${libdir}
+	${MKDIR} ${DESTDIR}${includedir}
+	${INSTALL_DATA} ${srcdir}/encap.h ${DESTDIR}${includedir}
+	${INSTALL_DATA} ../listhash/encap_listhash.h ${DESTDIR}${includedir}
+

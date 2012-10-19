@@ -1,0 +1,286 @@
+.TH epkg 1 "Oct 2002" "University of Illinois" "Package Management"
+.SH NAME
+epkg \- Encap package manager
+.SH SYNOPSIS
+\fBepkg [options] [-i] pkgspec ...\fP
+.br
+\fBepkg [options] -r pkgspec ...\fP
+.br
+\fBepkg [options] -k pkgspec ...\fP
+.br
+\fBepkg [options] -u [pkgspec ...]\fP
+.br
+\fBepkg [options] -b\fP
+.br
+\fBepkg [options] -c\fP
+.SH VERSION
+This man page documents version 2.3 of \fBepkg\fP.
+.SH DESCRIPTION
+\fBepkg\fP is an \fIEncap\fP package manager.  It allows the administrator
+to flexibly install, remove, and manage software packages which are
+commonly installed in \fI/usr/local\fP.
+
+\fBepkg\fP supports the \fIEncap 2.1\fP package format.
+.SH PACKAGE MODES
+\fBepkg\fP has the following operating modes:
+.TP
+.B -b
+Batch mode.  \fBepkg\fP will select the latest version of each package
+installed in the \fIEncap\fP source directory, remove all of the older
+versions, and install the latest version.
+.TP
+.B -c
+Clean target directory.  \fBepkg\fP will recursively go through the \fIEncap\fP
+target directory and remove any dangling symbolic links which point
+under the \fIEncap\fP source directory.  All subdirectories of the
+target directory are processed, except for the entries in the global
+exclude list (and, if \fI-E\fP is specified, \fIencap.exclude\fP
+entries in the target tree).
+.TP
+.B -k
+Check mode.  For each \fIpkgspec\fP listed on the commandline, \fBepkg\fP
+will check to see if the package is installed.
+.TP
+.B -i
+Install mode.  \fBepkg\fP will install only the package(s) specified
+on the commandline.  This mode is assumed if none are specified.
+
+If versioning is on (see \fI-S\fP), \fBepkg\fP will scan the source
+directory for all versions of each \fIpkgspec\fP listed on the
+commandline.  It then selects one version to be installed, removes all
+the other versions, and installs the selected one.  If the
+\fIpkgspec\fP specifies a version, that version is selected for
+installation.  If no version is specified, the latest available
+version is selected.
+
+If versioning is off, \fBepkg\fP will install only the exact package
+name and version which matches each \fIpkgspec\fP on the commandline.
+No other versions will be removed.
+.TP
+.B -r
+Remove mode.  \fBepkg\fP will remove the package(s) listed on
+the commandline.
+
+If versioning is on (see \fI-S\fP), \fBepkg\fP will remove all
+versions of each \fIpkgspec\fP which do not specify a version.  For
+the \fIpkgspec\fPs which do specify a version, only that version is
+removed.
+
+If versioning is off, only the exact package name and version which
+matches each \fIpkgspec\fP will be removed.
+.TP
+.B -u
+Update mode.  This mode will check a set of central distribution
+directories for new Encap packages and install them on the local system.
+The central distribution directories are referred to as the "update path".
+
+The update path is specified as a space-delimited list in the
+\fBENCAP_UPDATE_PATH\fP environment variable.  In directory names, the
+special token "%p" is replaced by the host platform name.
+
+If one or more \fIpkgspec\fPs are listed on the commandline, the update
+path is searched for newer versions of the listed packages than
+those that are already available on the system.  If a listed package
+is not available locally, any version of that package which is found in
+the update path is installed.
+
+If no \fIpkgspec\fPs are given on the commandline, the update path
+is searched for newer versions of each of the packages which are already
+available on the system.
+.SH OPTIONS
+Options which turn on or off features act as toggles.  Specifying them
+twice will return to the default behavior.
+.TP
+.B -1
+Back off from most recent version.  In versioning install mode, for each
+\fIpkgspec\fP which doesn't specify a version, install the next-to-latest
+version of the package rather than the latest version.
+.TP
+.B -a
+Use absolute symlinks.  The default is to use relative links.
+.TP
+.B -A platform_suffix
+Add \fIplatform_suffix\fP to the list of acceptable platform suffixes.
+Packages with any of the listed suffixes are considered acceptable for
+installation.
+.TP
+.B -C
+Client operation.  \fBepkg\fP will execute package scripts, but wont do any
+linking or removing.  This is useful when your Encap source and target
+directories are NFS-mounted on many client machines from a central
+server.  The linking or removing is taken care of on the server, but it
+is often desirable to run the package scripts on each client as well.
+.TP
+.B -d
+Tells \fBepkg\fP not to remove empty target directories.
+.TP
+.B -D
+Tells \fBepkg\fP not to honor \fIlinkdir\fP directives in the packages
+it processes.
+.TP
+.B -E
+Check for \fIencap.exclude\fP files in places other than under the package
+directory.  This includes the \fIEncap\fP source directory itself and
+all directories in the \fIEncap\fP target tree.  This option is deprecated,
+and is provided only for compatibility reasons.
+.TP
+.B -f
+Force conflict resolution.  If a file already exists when
+\fBepkg\fP attempts to create a link, it will be removed so that the
+link can be created.
+.TP
+.B -F
+Display debugging output for update mode.  This is especially useful for
+FTP connections.
+.TP
+.B -H host_platform
+Use \fIhost_platform\fP to identify the platform name of the machine
+\fBepkg\fP is running on.  If this option is not specified, the platform
+name is generated automatically.
+.TP
+.B -K
+Keep checking all update directories to find the latest matching
+package.  This option is enabled by default.  If disabled, \fBepkg\fP
+will stop looking for updates after the first update directory that
+contains any version of the requested package.
+.TP
+.B -l
+Disable transaction logging.
+.TP
+.B -L
+Tells \fBepkg\fP not to honor \fIlinkname\fP directives in the packages
+it processes.
+.TP
+.B -n
+Show what operations would have been performed without actually doing
+anything.
+.TP
+.B -N
+Removes the default entries from the global exclude list.
+.TP
+.B -o
+Removes the default entries from the list of packages to automatically
+override.
+
+The override list is primarily intended to help people transition from
+a monolithic \fI/usr/local\fP to using \fIEncap\fP.
+.TP
+.B -O pkgspec
+Add \fIpkgspec\fP to the list of packages whose links will be overriden
+when a new package is installed.  This option can be used multiple times.
+.TP
+.B -p
+Don't perform prerequisite checking.
+.TP
+.B -P
+Link or remove files directly in the package directory.  Normally, files
+in the package directory are not linked or removed.  Special package
+files, such as \fIencapinfo\fP and the package scripts, are not
+linked or removed even when \fB-P\fP is specified.  This option is deprecated,
+and is provided only for compatibility reasons.
+.TP
+.B -q
+Quiet mode.  \fBepkg\fP will not produce any output except for error
+messages.
+.TP
+.B -R
+Don't run package scripts.
+.TP
+.B -s source_dir
+Tells \fBepkg\fP to use \fIsource_dir\fP as the \fIEncap\fP source
+directory.  If the source is not specified but the target is,
+\fBepkg\fP will assume the relative path from the target to the
+source is \fIencap/\fP.  If neither is specified, \fBepkg\fP will check the
+contents of the \fPENCAP_SOURCE\fP environment variable.  If that is
+not set, it will use the default set at compile-time (usually
+\fI/usr/local/encap\fP).
+.TP
+.B -S
+Specific package only.  This tells \fIepkg\fP to disable versioning
+and operate only on the exact package and version specified.
+
+This option is only meaningful in install and remove modes.
+.TP
+.B -t target_dir
+Tells \fBepkg\fP to use \fItarget_dir\fP as the \fIEncap\fP target
+directory.  If the target is not specified but the source is,
+\fBepkg\fP will assume the relative path from the source to the
+target is \fI../\fP.  If neither is specified, \fBepkg\fP will check the
+contents of the \fBENCAP_TARGET\fP environment variable.  If that is
+not set, it will use the default set at compile-time (usually
+\fI/usr/local\fP).
+.TP
+.B -T
+Don't automatically retry connections to update directories.  The
+default is to retry connections.
+.TP
+.B -U update_dir
+Prepends \fIupdate_dir\fP to the update path (which is specified by the
+\fIENCAP_UPDATE_PATH\fP environment variable).
+.TP
+.B -v
+Increase verbosity.  This option can be specified multiple times.
+.TP
+.B -V
+Print \fBepkg\fP's version and compile-time defaults.
+.TP
+.B -x
+Do not check for excluded files within packages.  This does not
+affect the global exclude list (see \fI-X\fP) or \fIencap.exclude\fP files
+in other places (see \fI-E\fP).
+.TP
+.B -X exclude_path
+Add \fIexclude_path\fP to the global exclude list.
+
+If the \fIEncap\fP source directory lies under the \fIEncap\fP target
+directory, the relative path from target to source is automaticly added
+to the list.
+.SH TRANSACTION LOGGING
+By default, \fBepkg\fP will log an entry to the file \fIepkg.log\fP in
+the \fIEncap\fP source directory for each transaction indicating the date,
+target directory, package, install or remove as appropriate, and the
+status.  The status is \fIsuccess\fP if completely successful,
+\fIfailed\fP if there was a fatal error, \fIforced\fP if invoked in
+force mode (see above), or \fIpartial\fP if the operation was
+partially successful (for example, most of the links were created, but
+some could not be created because of a link by the same name into a
+previously-installed package).
+.SH EXAMPLES
+To install only package \fImutt-0.93.2i\fP:
+
+	\fBepkg -Si mutt-0.93.2i\fP
+
+To upgrade to the latest version of \fImutt\fP:
+
+	\fBepkg mutt\fP
+
+.SH BUGS
+Probably quite a few.  Reports are welcome.
+.SH ENVIRONMENT VARIABLES
+.B ENCAP_SOURCE
+.br
+.B ENCAP_TARGET
+.br
+.B ENCAP_PKGNAME
+.br
+.B ENCAP_MODE
+.br
+.B ENCAP_UPDATE_PATH
+.SH FILES
+.I /usr/local/encap/pkgname/encapinfo
+.br
+.I /usr/local/encap/pkgname/preinstall
+.br
+.I /usr/local/encap/pkgname/postinstall
+.br
+.I /usr/local/encap/pkgname/preremove
+.br
+.I /usr/local/encap/pkgname/postremove
+.SH SEE ALSO
+.BR mkencap (1)
+.br
+The \fBepkg\fP Homepage (\fIhttp://www.encap.org/epkg/\fP)
+.br
+The Encap Archive (\fIhttp://www.encap.org/\fP)
+.SH AUTHOR
+Mark D. Roth <roth@feep.net>

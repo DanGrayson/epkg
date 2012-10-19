@@ -1,0 +1,103 @@
+/* @configure_input@ */
+
+/*
+**  Copyright 1998-2002 University of Illinois Board of Trustees
+**  Copyright 1998-2002 Mark D. Roth
+**  All rights reserved.
+**
+**  @PATHCODE_PREFIX@_rmtree.c - recursive directory removal
+**
+**  Mark D. Roth <roth@uiuc.edu>
+**  Campus Information Technologies and Educational Services
+**  University of Illinois at Urbana-Champaign
+*/
+
+#include <@PATHCODE_PREFIX@_pathcode.h>
+
+#include <stdio.h>
+#include <errno.h>
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+#ifdef STDC_HEADERS
+# include <string.h>
+#endif
+
+
+
+/*
+** @PATHCODE_PREFIX@_rmtree() - delete all files in a given tree
+** returns:
+**	0			success
+**	-1 (and sets errno)	error
+*/
+int
+@PATHCODE_PREFIX@_rmtree(char *path,
+			 @PATHCODE_PREFIX@_rmtree_printfunc_t *printfunc,
+			 void *state)
+{
+	char buf[MAXPATHLEN];
+	DIR *dirp;
+	struct dirent *dep;
+	struct stat s;
+
+	if (printfunc != NULL)
+		(*printfunc)(state, path);
+
+	dirp = opendir(path);
+	if (dirp == NULL)
+		return -1;
+
+	while ((dep = readdir(dirp)) != NULL)
+	{
+		if (strcmp(dep->d_name, ".") == 0
+		    || strcmp(dep->d_name, "..") == 0)
+			continue;
+
+		snprintf(buf, sizeof(buf), "%s/%s", path, dep->d_name);
+		if (stat(buf, &s) == -1)
+			goto rmtree_error;
+
+		if (S_ISDIR(s.st_mode)
+		    && @PATHCODE_PREFIX@_rmtree(buf, printfunc, state) == -1)
+			goto rmtree_error;
+
+		if (unlink(buf) == -1)
+			goto rmtree_error;
+	}
+
+	closedir(dirp);
+	return rmdir(path);
+
+rmtree_error:
+	closedir(dirp);
+	return -1;
+}
+
+
+
+#ifdef TEST_RMTREE
+
+static void
+rmtree_print(void *state, char *dir)
+{
+	printf("removing directory: %s\n", dir);
+}
+
+
+int
+main(int argc, char *argv[])
+{
+	if (@PATHCODE_PREFIX@_rmtree(argv[1], rmtree_print, NULL) == -1)
+		perror("@PATHCODE_PREFIX@_rmtree()");
+}
+
+#endif /* TEST_RMTREE */
+
+

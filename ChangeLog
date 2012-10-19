@@ -1,0 +1,357 @@
+epkg 2.3.9 - 7/18/04
+----------
+
+- updated download code to use new libfget-1.3.x API
+
+----------------------------------------------------------------------
+
+epkg 2.3.8 - 4/24/03
+----------
+
+- fixed epkg update mode to check all subsequent packages, even if no
+  versions of a preceding package were found
+
+----------------------------------------------------------------------
+
+epkg 2.3.7 - 4/24/03
+----------
+
+- updated README
+- fixed bug from 2.3.3 related to old ENCAP_UPDATEDIR environment variable
+  (thanks to Chris Goldsmith <cgoldsmi@uiuc.edu> and
+   Melissa Woo <m-woo@uiuc.edu> for the bug reports)
+- fixed description of "-o" option in mkencap(1) man page
+  (based on feedback from Chris Goldsmith <cgoldsmi@uiuc.edu>)
+- fixed bug in epkg/log.c that wrote an empty status field to the log
+  file on some platforms
+- improved mkencap warning messages about not overwriting in profile
+  download or unpack modes
+- fixed common/download.c to fail for known URL types when built without
+  the required libraries
+- fixed epkg update mode to fail when no version of a specified package
+  is found in the update path
+- added support for compressed patch files to mkencap profile code
+
+----------------------------------------------------------------------
+
+epkg 2.3.6 - 3/2/03
+----------
+
+- fixed segfault in mkencap profile parsing code when m4 died with no output
+  (thanks to Matt Schechtman <schechtm@uiuc.edu> for the bug report)
+- fixed mkencap to print message when source file has already been downloaded
+- changed mkencap to display contents of profile <notes> element
+- changed mkencap "-m" option to specify full m4 command
+  (allows specifying path to GNU m4 if it's not the first m4 binary in PATH)
+  (thanks to Matt Schechtman <schechtm@uiuc.edu> for the suggestion)
+- changed mkencap "-M" option to use stdout if filename is "-"
+- updated README
+
+----------------------------------------------------------------------
+
+epkg 2.3.5 - 2/6/03
+----------
+
+- fixed mkencap profile parsing code to reject elements in the wrong context
+- fixed mkencap profile parsing code to accept whitespace-only lines
+  inside the <encapinfo> element
+  (thanks to Jon Marks <jwm@uiuc.edu> for the bug report)
+- fixed encapinfo_parse_directive() to avoid segfault on directives with
+  no arguments
+  (thanks to torsten <torsten@inetw.net> for the bug report)
+
+----------------------------------------------------------------------
+
+epkg 2.3.4 - 2/2/03
+----------
+
+- added progress reporting for HTTP downloads
+- fixed bug in handling epkg "-U" option
+
+----------------------------------------------------------------------
+
+epkg 2.3.3 - 1/30/03
+----------
+
+- fixed Makefile.in bug in install target for --disable-encap
+- fixed mkencap to exit if it cannot download a file from any of the
+  URLs specified in the profile
+- fixed description of "-n" option in epkg(1) man page
+  (thanks to Matt Schechtman <schechtm@uiuc.edu> for the suggestion)
+- added directory cache to epkg update mode to speed up HTTP updates
+
+----------------------------------------------------------------------
+
+epkg 2.3.2 - 1/7/03
+----------
+
+- fixed mkencap segfault when parsing a profile with unknown attributes
+  (thanks to Greg Fast <gdf@speakeasy.net> for the bug report)
+- added info on EPKG-DEV-L list to README file
+- improved error checking in mkencap profile parsing code
+- fixed mkencap to check m4 exit code when preprocessing profiles
+- fixed build files to honor --disable-epkg-install
+  (thanks to Greg Fast <gdf@speakeasy.net> for the bug report)
+- fixed <include_file> element mode attribute bug under HP-UX
+- updated encap profile DTD
+- fixed mkencap profile parsing code to detect missing required attributes
+
+----------------------------------------------------------------------
+
+epkg 2.3.1 - 12/23/02
+----------
+
+- include <sys/wait.h> from common/archive.c
+  (thanks to "Lew E. Lefton" <llefton@math.gatech.edu> for the bug report)
+- added "m4_" prefix to all builtins in mkencap/mkencap.m4
+- fixed bug in mkencap profile code when -P was specified without -D
+
+----------------------------------------------------------------------
+
+epkg 2.3.0 - 12/21/02
+----------
+
+- nest build directories for profiles with only one <source> if the
+  source subdirectory doesn't match the pkgspec
+- use pkgspec subdirectories in common source tree to avoid conflicting
+  paths between two versions of a package that use different patches
+- only download patches in download mode
+- overwrite files when unpacking source archives
+- create m4 output file if it doesn't already exist
+- use GNU m4's -P option to avoid accidentally tripping on a macro name
+- for <prereq> element's use_bin attribute, prepend to PATH instead of
+  appending
+- added NEWS file
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev14 - 12/20/02
+--------------
+
+- minor code cleanups
+- install mkencap_environment from postinstall script
+- save $TZ from mkencap's environment
+- don't nest build directories for profiles with only one <source>
+- avoid use of non-portable "whence" builtin in configure.ac
+- changed mkencap profile unpack mode when source tree already exists:
+  if -f is used, remove existing source tree and extract again;
+  otherwise, continue without extracting so existing tree can be used
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev13 - 12/18/02
+--------------
+
+- fixed mkencap/Makefile.in to not overwrite pre-existing
+  mkencap_environment file
+- added note to README file about gcc
+- fixed file permission problem on files moved to package directory
+- avoid segfault when <prereq> element's use_bin or use_lib attributes
+  are used but no <environment> elements are present
+- don't overwrite existing files when unpacking source files
+- changed default <prepackage> commands to avoid stripping libraries
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev12 - 12/18/02
+--------------
+
+- fixed a bug when <environment> element was used without type attribute
+- added use_bin and use_lib attributes to <prereq> element
+- allow variable substitution in <environment> element's value attribute
+- assume default values for environment variables used by default commands
+- renamed mkencap download dir option from "-z" to "-d"
+- added mkencap "-F" option to specify environment file
+- configure script now generates mkencap_environment
+- minor portability fixes
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev11 - 12/9/02
+--------------
+
+- run <prepackage> commands before creating <include_file>s
+  (thanks to Mike Drzal <drzal@uiuc.edu> for the suggestion)
+- removed mkencap "-i" mode and associated options
+- removed mkencap "-F" option
+- changed mkencap to add profile and patches to package directory and
+  create encapinfo file in install mode ("-bI")
+- changed mkencap create mode to use platform and package format version
+  from encapinfo file to determine default archive filename
+- fixed mkencap to not honor "-a" option in build mode
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev10 - 11/27/02
+--------------
+
+- fixed autoconf to check for fget-1.2.7 or newer
+  (thanks to Geoff Raye <geoff@raye.com> for the bug report)
+- split up ChangeLog into multiple files
+- allow whitespace-delimited list of URLs as value for url attribute
+  of <source> and <patch> elements
+  (thanks to Alex J. Lovell-Troy <alovell@uiuc.edu> and
+  Mike Drzal <drzal@uiuc.edu> for the suggestion)
+- fixed bug when trying to download a file that already exists locally
+  (thanks to Alex J. Lovell-Troy <alovell@uiuc.edu> for the bug report)
+- tweaked Makefile dependencies
+- improved XML parser error messages
+  (thanks to Alex J. Lovell-Troy <alovell@uiuc.edu> for the suggestion)
+- overwrite <include_file>s when "-f" is used
+  (thanks to Mike Drzal <drzal@uiuc.edu> for the bug report)
+- fixed default <prepackage> command to use POSIX-compliant find options
+  (thanks to Mike Drzal <drzal@uiuc.edu> for the bug report)
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev9 - 11/27/02
+-------------
+
+- updated compat code
+- updated README file
+- clarified option description on mkencap(1) man page
+- clarified description of <include_file> name attribute on
+  encap_profile(5) man page
+  (thanks to Greg Fast <gdf@speakeasy.net> for the suggestion)
+- fixed bug in handling <include_file> owner and group attributes
+- added support for "file://" URLs
+- fixed bug in download code for local files
+- use absolute path when including package profile in package directory
+  (thanks to Alex J. Lovell-Troy <alovell@uiuc.edu> for the bug report)
+- fixed potential segfault for profiles with no <include_file> elements
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev8 - 11/21/02
+-------------
+
+- updated mkencap(1) man page
+- add note to encap_profile(5) that XML element names are case-sensitive
+  (thanks to Greg Fast <gdf@speakeasy.net> for the suggestion)
+- added work-around for Linux mkstemp() horkage
+- make sure tmpfile gets deleted when downloading files
+  (thanks to Greg Fast <gdf@speakeasy.net> for the bug report)
+- improve error reporting in compression code
+  (thanks to Greg Fast <gdf@speakeasy.net> for the bug report)
+- fixed mkencap to create download directory if it doesn't already exist
+  (thanks to Greg Fast <gdf@speakeasy.net> for the suggestion)
+- added "COMMAND ELEMENTS" section to encap_profile(5) man page
+  (thanks to Greg Fast <gdf@speakeasy.net> for the suggestion)
+- added mkencap "-M" option for debugging m4 preprocessing
+  (thanks to Greg Fast <gdf@speakeasy.net> for the suggestion)
+- added <prepare> element to package profile format
+  (thanks to Greg Fast <gdf@speakeasy.net> for the suggestion)
+- added DTD for package profile format
+  (based on contribution from Greg Fast <gdf@speakeasy.net>)
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev7 - 11/17/02
+-------------
+
+- added mkencap "-m" option for specifying additional m4 arguments
+- fixed archive code to be quiet unless "-v" is specified
+- added ".tar" to extensions list in mkencap build code
+- when using <patch url="..." />, add the downloaded file to the
+  list of files to be included in the package directory
+- avoid segfault on empty command value
+- avoid segfault on build failures
+- restore original environment after processing package profile
+  (this avoids stomping on $ENCAP_CONTACT and $TZ)
+- removed <package> element from profile format
+- added <unpack> element to profile format
+- added build_subdir attribute to <source> element
+- added mkencap "-z" option to set download directory
+  (and added configure --with-download-dir option to set default)
+- do not check whether source has already been unpacked
+- fixed mkencap's default archive filename in build mode
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev6 - 10/29/02
+-------------
+
+- document required cURL version in README file
+- fix configure script to require curl-7.9.8 or newer
+- fixed mkencap/mkencap.h to allow building without libexpat
+- added --with-build-tree and --with-common-src-tree configure options
+- in build and create modes, copy package profile to package directory
+- fixed coredump in profile environment code
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev5 - 10/25/02
+-------------
+
+- added support for <prepackage> element
+- removed encap(7) man page (specification is viewable on the web)
+- updated man pages
+- added encap_profile(5) man page
+- added Encap 2.1 specification
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev4 - 10/24/02
+-------------
+
+- really fixed curl detection this time
+- check exit code of patch command
+- refactored tar archive code
+- use common tar archive code for extracting source code
+- implemented patch downloading
+- mkencap now honors the $PATCH environment variable
+- mkencap will now read default environment settings
+  from ${sysconfdir}/mkencap_environment
+- for profiles with multiple sources, mkencap will work breadth-first
+  instead of depth-first (i.e., process the download phase for all
+  sources, then the unpack phase for all sources, etc)
+- HTTP downloads will seamlessly follow redirects
+- fix profile code to use type="set" if no type attribute is specified
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev3 - 8/5/02
+-------------
+
+- minor portability fixes
+- fixed mkencap/build.c to compile even if HAVE_LIBEXPAT is unset
+- improved error reporting in common/download.c
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev2 - 8/4/02
+-------------
+
+- fixed HP-UX platform name code
+- moved shared code to "common" subdirectory to work around VPATH problem
+- fixed function pointer semantics for download_dir()
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev1 - 7/31/02
+-------------
+
+- improved autoconf detection of curl
+- various portability fixes
+- fixed stupid bug in is_package_archive()
+
+----------------------------------------------------------------------
+
+epkg 2.3.dev0 - 7/29/02
+-------------
+
+- added encapinfo_parse_directive() to libencap API
+- added Encap package profile support using libexpat
+- added ".PHONY" target in top-level Makefile.in to fix portability issue
+  (thanks to Alex J. Lovell-Troy <alovell@uiuc.edu> for the bug report)
+- if FTP server times out between downloads, automatically attempt to
+  reconnect
+- added "-T" option to disable automatic reconnection
+- updated COPYRIGHT file
+- restructured autoconf macros
+- added pathcode gsub() function
+- refactored compression code
+- add encapinfo file as close to front of archive as possible
+- add HTTP update support using libcurl
+- refactored download code
+

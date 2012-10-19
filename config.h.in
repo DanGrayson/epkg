@@ -1,0 +1,188 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Default build directory */
+#undef DEFAULT_BUILD_TREE
+
+/* Default common source tree */
+#undef DEFAULT_COMMON_SRC_TREE
+
+/* Default download directory */
+#undef DEFAULT_DOWNLOAD_DIR
+
+/* Default exclude directories */
+#undef DEFAULT_EXCLUDES
+
+/* Default override list */
+#undef DEFAULT_OVERRIDES
+
+/* Default Encap source directory */
+#undef DEFAULT_SOURCE
+
+/* Default Encap target directory */
+#undef DEFAULT_TARGET
+
+/* Define if your system has a working basename */
+#undef HAVE_BASENAME
+
+/* Define to 1 if you have the <ctype.h> header file. */
+#undef HAVE_CTYPE_H
+
+/* Define if your system has a working dirname */
+#undef HAVE_DIRNAME
+
+/* Define to 1 if your system has a working POSIX `fnmatch' function. */
+#undef HAVE_FNMATCH
+
+/* Define to 1 if you have the <fnmatch.h> header file. */
+#undef HAVE_FNMATCH_H
+
+/* Define if you have the gethostname function */
+#undef HAVE_GETHOSTNAME
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define if you have libcurl */
+#undef HAVE_LIBCURL
+
+/* Define to 1 if you have the `expat' library (-lexpat). */
+#undef HAVE_LIBEXPAT
+
+/* Define if your system has a current version of libfget */
+#undef HAVE_LIBFGET
+
+/* Define to 1 if you have the <libgen.h> header file. */
+#undef HAVE_LIBGEN_H
+
+/* Define to 1 if you have the `nsl' library (-lnsl). */
+#undef HAVE_LIBNSL
+
+/* Define to 1 if you have the `odm' library (-lodm). */
+#undef HAVE_LIBODM
+
+/* Define to 1 if you have the `socket' library (-lsocket). */
+#undef HAVE_LIBSOCKET
+
+/* Define if your system has a current version of libtar */
+#undef HAVE_LIBTAR
+
+/* Define to 1 if you have the `z' library (-lz). */
+#undef HAVE_LIBZ
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <odmi.h> header file. */
+#undef HAVE_ODMI_H
+
+/* Define if your system has a working snprintf */
+#undef HAVE_SNPRINTF
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define if you have the strdup function */
+#undef HAVE_STRDUP
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define if you have the strlcat function */
+#undef HAVE_STRLCAT
+
+/* Define if you have the strlcpy function */
+#undef HAVE_STRLCPY
+
+/* Define if you have the strrstr function */
+#undef HAVE_STRRSTR
+
+/* Define if you have the strsep function */
+#undef HAVE_STRSEP
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/systemcfg.h> header file. */
+#undef HAVE_SYS_SYSTEMCFG_H
+
+/* Define to 1 if you have the <sys/systeminfo.h> header file. */
+#undef HAVE_SYS_SYSTEMINFO_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
+#undef HAVE_SYS_WAIT_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define if you want to use the basename function */
+#undef NEED_BASENAME
+
+/* Define if you want to use the dirname function */
+#undef NEED_DIRNAME
+
+/* Define if you want to use the fnmatch function */
+#undef NEED_FNMATCH
+
+/* Define if you want to use the gethostname function */
+#undef NEED_GETHOSTNAME
+
+/* Define if you want to use the snprintf function */
+#undef NEED_SNPRINTF
+
+/* Define if you want to use the strdup function */
+#undef NEED_STRDUP
+
+/* Define if you want to use the strlcat function */
+#undef NEED_STRLCAT
+
+/* Define if you want to use the strlcpy function */
+#undef NEED_STRLCPY
+
+/* Define if you want to use the strrstr function */
+#undef NEED_STRRSTR
+
+/* Define if you want to use the strsep function */
+#undef NEED_STRSEP
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if on AIX 3.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _ALL_SOURCE
+# undef _ALL_SOURCE
+#endif
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t

@@ -1,0 +1,69 @@
+# @configure_input@
+
+### Path settings
+prefix		= @prefix@
+top_srcdir	= @top_srcdir@
+srcdir		= @srcdir@
+exec_prefix	= @exec_prefix@
+bindir		= @bindir@
+mandir		= @mandir@
+libdir		= @libdir@
+includedir	= @includedir@
+sysconfdir	= @sysconfdir@
+
+PACKAGE_NAME	= @PACKAGE_NAME@
+PACKAGE_VERSION	= @PACKAGE_VERSION@
+
+@ENCAP_DEFS@
+
+# override the values that configure finds - always use the new version
+EPKG		= @EPKG@
+MKENCAP		= @MKENCAP@
+
+### Installation programs and flags
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+MKDIR		= @MKDIR@
+
+@SET_MAKE@
+
+
+### Makefile rules - no user-servicable parts below
+
+SUBDIRS		= lib epkg mkencap doc
+
+all:
+	for n in ${SUBDIRS}; do \
+		( cd $$n && ${MAKE} $@ ${MAKE_FLAGS} ) || exit 1; \
+	done
+
+.PHONY: install install-recurse postinstall-encap postinstall-no-encap clean distclean
+
+install: install-recurse @ENCAP_INSTALL_TARGET@
+
+install-recurse:
+	for n in ${SUBDIRS}; do \
+		( cd $$n && ${MAKE} install ${MAKE_FLAGS} ) || exit 1; \
+	done
+
+postinstall-encap:
+	${INSTALL_DATA} mkencap/mkencap_environment "${DESTDIR}${ENCAP_SOURCE}/${ENCAP_PKGSPEC}";
+	${INSTALL_PROGRAM} ${srcdir}/postinstall "${DESTDIR}${ENCAP_SOURCE}/${ENCAP_PKGSPEC}";
+	@ENCAP_INSTALL_RULES@
+
+postinstall-no-encap:
+	${MKDIR} ${DESTDIR}${sysconfdir}
+	${INSTALL_DATA} mkencap/mkencap_environment ${DESTDIR}${sysconfdir}
+
+clean:
+	for n in ${SUBDIRS}; do \
+		( cd $$n && ${MAKE} $@ ${MAKE_FLAGS} ) || exit 1; \
+	done
+
+distclean:
+	for n in ${SUBDIRS}; do \
+		( cd $$n && ${MAKE} $@ ${MAKE_FLAGS} ) || exit 1; \
+	done
+	rm -f config.cache config.log config.status config.h Makefile
+

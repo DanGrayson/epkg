@@ -1,0 +1,255 @@
+.TH mkencap 1 "Oct 2002" "University of Illinois" "Package Management"
+.SH NAME
+mkencap \- Encap package creation tool
+.SH SYNOPSIS
+\fBmkencap [options] -b [-DUPCBIT] \\
+.br
+        [-m m4_cmd] [-M m4_outfile] \\
+.br
+        [-d download_dir] [-F environment_file] \\
+.br
+        [-O build_tree] [-S src_tree] profile
+
+mkencap [options] \\
+.br
+        [ -e [-n] [-a "encapinfo_directive ..."] ] \\
+.br
+        [ -c [-o outfile] ] pkgspec\fP
+.SH VERSION
+This man page documents version 2.3 of \fBmkencap\fP.
+.SH DESCRIPTION
+\fBmkencap\fP is a tool to help create \fIEncap\fP 2.1 packages.  It can
+create package directories, generate \fIencapinfo\fP files, and create
+package archives.
+.SH MODES
+Any combination of these modes may be specified when \fBmkencap\fP is
+invoked.  Directory initialization is done first, if selected.  Then,
+if the \fIencapinfo\fP file is needed, it is created.  Finally, a tar
+archive is created if desired.
+.TP
+.B -b
+Build the package from a profile.  If the \fI-b\fP option is specified,
+\fIpackage\fP should be the path to the file containing the package's
+profile.  (See \fBPACKAGE PROFILE OPTIONS\fP below for other related
+options.)
+.TP
+.B -e
+Create an \fIencapinfo\fP file in the package directory.
+(See \fBENCAPINFO OPTIONS\fP below for other related options.)
+.TP
+.B -c
+Create archive.  \fBmkencap\fP will create a (optionally compressed)
+tar archive of \fIpackage\fP.  (See \fBARCHIVE CREATION OPTIONS\fP
+below for other related options.)
+.PP
+If none of these options are selected, \fBmkencap\fP will create an
+\fIencapinfo\fP file and a tar archive.
+.SH GENERAL OPTIONS
+These options may be used in combination with any other options:
+.TP
+.B -E encap_format
+Specify the Encap package format version of the new package.  The
+default is \fI2.1\fP.
+.TP
+.B -p platform
+Set the package's Encap platform name to \fIplatform\fP.  If this option
+is not specified, the platform name is set to that of the host that
+\fBmkencap\fP is running on.
+.TP
+.B -A platform_suffix
+Appends \fIplatform_suffix\fP to the package's Encap platform name.
+.TP
+.B -f
+Force \fBmkencap\fP to overwrite an existing \fIencapinfo\fP file.
+.TP
+.B -q
+Quiet mode.  Only error messages are output to stdout.
+.TP
+.B -s source_dir
+Tells \fBmkencap\fP to use \fIsource_dir\fP as the \fIEncap\fP source
+directory.  If the source is not specified but the target is,
+\fBmkencap\fP will assume the relative path from the target to the
+source is \fIencap/\fP.  If neither is specified, \fBmkencap\fP will check the
+contents of the \fPENCAP_SOURCE\fP environment variable.  If that is
+not set, it will use the default set at compile-time (usually
+\fI/usr/local/encap\fP).
+.TP
+.B -t target_dir
+Tells \fBmkencap\fP to use \fItarget_dir\fP as the \fIEncap\fP target
+directory.  If the target is not specified but the source is,
+\fBmkencap\fP will assume the relative path from the source to the
+target is \fI../\fP.  If neither is specified, \fBmkencap\fP will check the
+contents of the \fBENCAP_TARGET\fP environment variable.  If that is
+not set, it will use the default set at compile-time (usually
+\fI/usr/local\fP).
+.TP
+.B -v
+Increase verbosity.  This option can be specified multiple times.
+.TP
+.B -V
+Print \fBmkencap\fP version and compile-time defaults.
+.SH PACKAGE PROFILE OPTIONS
+These options are only meaningful when processing package profiles (see
+\fI-b\fP option above):
+.TP
+.B -D
+Download source distribution if not already present.  The downloaded
+file is placed in the common source tree.
+.TP
+.B -U
+Unpack source distribution.
+.TP
+.B -P
+Apply any necessary patches to source distribution.
+.TP
+.B -C
+Configure source distribution.
+.TP
+.B -B
+Build source distribution.
+.TP
+.B -I
+Install source distribution to create an Encap package.
+(This usually needs to be done as \fIroot\fP.)
+.TP
+.B -T
+Tidy source distribution.
+.PP
+If none of the \fI-DUPCBIT\fP options are selected, the default
+is \fI-DUPCB\fP.
+.TP
+.B -m m4_cmd
+Use the command \fIm4_cmd\fP to preprocess the package profile.
+If the \fI-m\fP option is not specified, \fBmkencap\fP will check the
+\fIMKENCAP_M4_COMMAND\fP environment variable.  If that variable is
+unset, \fBmkencap\fP will use the string "m4", which means that it will
+use the first \fBm4\fP binary available in the \fIPATH\fP.
+
+.B Note:
+The preprocessing command must point to GNU \fBm4\fP.  If the
+first \fBm4\fP binary in your \fIPATH\fP is not GNU \fBm4\fP, you must
+use either the \fIMKENCAP_M4_COMMAND\fP environment variable or the
+\fI-m\fP option to specify the path to GNU \fBm4\fP.
+
+This option can be used to simply override which \fBm4\fP binary is
+used, as in:
+
+  mkencap -m /usr/local/bin/m4 -b pkgspec.ep
+
+However, it can also be used to add options to be passed to the \fBm4\fP
+command, as in:
+
+  mkencap -m "m4 -Dmacro=value" -b pkgspec.ep
+.TP
+.B -d download_dir
+Tells \fBmkencap\fP where to put source files as they are downloaded.
+If the \fI-d\fP option is not specified, \fBmkencap\fP will check the
+\fIMKENCAP_DOWNLOAD_DIR\fP environment variable.  If that variable is
+unset, \fBmkencap\fP will use the default set at compile-time (usually
+\fI/usr/local/src\fP).
+.TP
+.B -F environment_file
+Tells \fBmkencap\fP to read environment variable settings from
+\fIenvironment_file\fP.  If the \fI-F\fP option is not specified,
+\fBmkencap\fP will use the default set at compile-time (usually
+\fI/usr/local/etc/mkencap_environment\fP).
+.TP
+.B -S src_tree
+Tells \fBmkencap\fP where the common source tree is located.  For
+packages that can be built in a seperate directory from where the source
+code is located, the source code will be stored in the common source
+tree.  If the \fI-S\fP option is not specified, \fBmkencap\fP will check
+the \fIMKENCAP_SRC_TREE\fP environment variable.  If that variable is
+unset, \fBmkencap\fP will store the source code in the build tree.
+.TP
+.B -O build_tree
+Tells \fBmkencap\fP where the build tree is located.  The build tree is
+used for building packages from source code.  If the \fI-O\fP option is
+not specified, \fBmkencap\fP will check the \fIMKENCAP_BUILD_TREE\fP
+environment variable.  If that variable is unset, \fBmkencap\fP will
+use the default set at compile-time (usually \fI/usr/local/src\fP).
+
+If the build tree path contains the string "%p", it will be replaced
+with the platform name.
+.TP
+.B -M m4_outfile
+Tells \fBmkencap\fP to write the output of \fBm4\fP to the file
+\fIm4_outfile\fP.  If \fIm4_outfile\fP is "-", the output will be
+written to \fIstdout\fP.
+
+This option is useful for debugging problems caused by \fBm4\fP
+preprocessing.
+.SH ENCAPINFO OPTIONS
+These options are only meaningful when creating an \fIencapinfo\fP file
+(see \fI-e\fP option above):
+.TP
+.B -n
+Do not add default \fIcontact\fP, \fIdate\fP, and \fIplatform\fP fields to
+the \fIencapinfo\fP file.
+
+When adding the \fIcontact\fP field, \fBmkencap\fP will first check the
+environment variable \fIENCAP_CONTACT\fP.  If unset, it will use the
+username of the invoking user and the hostname of the host it was run on.
+.TP
+.B -a "encapinfo_directive ..."
+Adds the specified directive to the \fIencapinfo\fP file.  Syntax checking
+is done to ensure that the line is parsable.
+.SH ARCHIVE CREATION OPTIONS
+This option is only meaningful when creating an archive file (see
+\fI-c\fP option above):
+.TP
+.B -o outfile
+Specify the output filename when creating an archive.  If the filename ends
+in \fI.tgz\fP or \fI.gz\fP, it is compressed using \fBgzip\fP(1).  If the
+filename ends in \fI.Z\fP, it is compressed using \fBcompress\fP(1).  If
+the filename ends in \fI.bz2\fP, it is compressed using \fBbzip2\fP(1).
+
+For Encap 2.0 packages, the default is \fIpkgspec.tar.gz\fP.
+
+For Encap 2.1 packages, the default is
+\fIpkgspec-encap-platform.tar.gz\fP.  The \fIplatform\fP string will be
+read from the \fIencapinfo\fP file.
+.SH EXAMPLES
+To create an \fIencapinfo\fP file for the package "pkg-2.1" with the
+directives "linkname bin/foo quux" and "linkname man/man1/foo.1 quux.1":
+
+.RS
+mkencap -ea "linkname bin/foo quux" \\
+.br
+        -a "linkname man/man1/foo.1 quux.1" pkg-2.1
+.RE
+
+To create an \fIencapinfo\fP file for the package "pkg-3.0" containing
+the directives "exclude bin/burfle" and "linkdir lib/pkg", and create
+an archive of the package in your home directory:
+
+.RS
+mkencap -a "exclude bin/burfle" -a "linkname lib/pkg" \\
+.br
+        -o ~/pkg-3.0-encap-share.tgz pkg-3.0
+.RE
+.SH ENVIRONMENT VARIABLES
+.B ENCAP_SOURCE
+.br
+.B ENCAP_TARGET
+.br
+.B ENCAP_CONTACT
+.br
+.B MKENCAP_DOWNLOAD_DIR
+.br
+.B MKENCAP_SRC_TREE
+.br
+.B MKENCAP_BUILD_TREE
+.br
+.B MKENCAP_M4_COMMAND
+.SH FILES
+.I /usr/local/encap/pkgname/encapinfo
+.br
+.I /usr/local/etc/mkencap_environment
+.SH SEE ALSO
+.BR epkg (1),
+.BR encap_profile (5)
+.br
+The Encap Archive (\fIhttp://www.encap.org/\fP)
+.SH AUTHOR
+Mark D. Roth <roth@feep.net>

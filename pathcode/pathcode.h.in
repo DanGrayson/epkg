@@ -1,0 +1,83 @@
+/* @configure_input@ */
+
+/*
+**  Copyright 1998-2002 University of Illinois Board of Trustees
+**  Copyright 1998-2002 Mark D. Roth
+**  All rights reserved.
+**
+**  @PATHCODE_PREFIX@_pathcode.h - header file for pathcode module
+**
+**  Mark D. Roth <roth@uiuc.edu>
+**  Campus Information Technologies and Educational Services
+**  University of Illinois at Urbana-Champaign
+*/
+
+#ifndef @PATHCODE_PREFIX@_PATHCODE_H
+#define @PATHCODE_PREFIX@_PATHCODE_H
+
+#include <config.h>
+#include <compat.h>
+
+
+/***** cleanpath.c ***********************************************************/
+
+/*
+** @PATHCODE_PREFIX@_cleanpath() - create a clean representation of path via string manipulation:
+**    - squeezes multiple '/' characters
+**    - removes previous directory with ".." (except at start of relative path)
+**    - removes "." (except where all path components cancel)
+** arguments: path to clean, buf to write to, buf size
+*/
+int @PATHCODE_PREFIX@_cleanpath(char *, char *, size_t);
+
+
+/***** gsub.c ****************************************************************/
+
+/*
+** @PATHCODE_PREFIX@_gsub() - replace all instances of a substring in a
+**                            given string with a different substring
+*/
+void @PATHCODE_PREFIX@_gsub(char *, char *, char *, char *, size_t);
+
+
+/***** mkdirhier.c ***********************************************************/
+
+typedef void (@PATHCODE_PREFIX@_mkdirhier_printfunc_t)(void *, char *);
+
+/*
+** @PATHCODE_PREFIX@_mkdirhier() - create all directories in a given path
+** returns:
+**	0				success
+**	1				no directories needed to be created
+**	-1 (and sets errno)		failure
+*/
+int @PATHCODE_PREFIX@_mkdirhier(char *, @PATHCODE_PREFIX@_mkdirhier_printfunc_t *, void *);
+
+
+/***** rmtree.c **************************************************************/
+
+typedef void (@PATHCODE_PREFIX@_rmtree_printfunc_t)(void *, char *);
+
+/*
+** @PATHCODE_PREFIX@_rmtree() - create all directories in a given path
+** returns:
+**	0				success
+**	-1 (and sets errno)		failure
+*/
+int @PATHCODE_PREFIX@_rmtree(char *, @PATHCODE_PREFIX@_mkdirhier_printfunc_t *, void *);
+
+
+/***** relativepath.c ********************************************************/
+
+/*
+** @PATHCODE_PREFIX@_relativepath() - return a relative path from start_dir to finish_dir
+** arguments: start dir, finish dir, result buffer, buffer size
+** returns:
+**      0                               success
+**      -1 (and sets errno)             failure
+*/
+int @PATHCODE_PREFIX@_relativepath(char *, char *, char *, size_t);
+
+
+#endif /* ! @PATHCODE_PREFIX@_PATHCODE_H */
+

@@ -1,0 +1,452 @@
+                   Encap Package Format Specification
+
+                     Mark D. Roth <roth@uiuc.edu>
+			   August 18, 1999
+
+
+1. Introduction
+
+   The Encap package management system is an extremely flexible,
+   portable way to manage installation and upgrades of third-party
+   packages on Unix systems.  Encap was developed over the course of
+   time by a number of talented people here at the University of
+   Illinois.  Over the last several years, it has become quite popular
+   as UIUC alumni leave campus and introduce it to other institutions.
+
+   Recently, many extensions have been added on to the classic Encap
+   package format.  These extensions are extremely useful, but due to
+   a lack of standardization, it has fallen to the user and the package
+   manager to discern what must be supported to install a given package.
+   Because of this lack of uniformity, Encap packages are losing
+   the portability which has always been one of their strong points.
+   It has become clear that a standard must be adopted if Encap is to
+   continue to grow.
+
+   This document provides a specification of the different versions of
+   the Encap package format, including as the classic format
+   (henceforth referred to as "Encap 1.0") and the new Encap 2.0
+   format, which integrates many new extensions.  The goal is to make
+   it easier for users and package managers to detect and handle what
+   needs to be done to install a given package.  Also, by distributing
+   this standard, it is hoped that the functionality will be
+   integrated into more package managers and become more widely used.
+
+2. Review of Encap 1.x
+
+   Encap 1.0 refers to the "classic" package format used by the
+   encap.pl and encapper package managers.  Encap 1.1 refers to
+   packages which use the extensions introduced by epkg before this
+   specification was written.
+
+2.1. Structure of Encap 1.0 Packages
+
+   An Encap 1.0 package is distributed as an archive file created
+   using tar and optionally compressed using gzip or compress.  It is
+   distributed as a tar archive which contains the package directory
+   and all of its subdirectories.  Packages can be installed by
+   extracting the files under the Encap source directory (usually
+   /usr/local/encap).
+
+   An Encap Package Manager is used to maintain symlinks in the Encap
+   target directory (usually /usr/local) which point to the files in
+   the Encap source tree.  There is no clear standard on whether files
+   directly in a package directory should be linked into the target
+   tree in an Encap 1.0 package, but links to files in subdirectories
+   are always maintained.
+
+   The only special feature included in the Encap 1.0 format is the
+   use of encap.exclude files.  If a file named encap.exclude exists
+   in any subdirectory of a package, it indicates files which should
+   not be processed when installing or removing the package.  Each
+   line of the encap.exclude file must be the name of a file in the
+   same directory as the encap.exclude file.  Paths to files in
+   subdirectories or other directories are not allowed.  Filename
+   globbing is also not allowed; the specified filename must be an
+   exact match.
+
+2.2. Structure of Encap 1.1 Packages
+
+   Encap 1.1 packages are structured the same as Encap 1.0 packages,
+   with two additions.
+
+   The first addition is that an entry in an encap.exclude file may
+   contain a relative path which refers to a file in a subdirectory of
+   the directory that the encap.exclude file is in.
+
+   The second addition is that the package may contain any of the
+   package scripts which are part of the Encap 2.0 specification
+   (described below).
+
+2.3. Handling Encap 1.x Packages
+
+   Because the 1.x versions of the package format were not clearly
+   standardized, there is no easy way to detect whether a given Encap
+   1.x package uses the 1.0 or 1.1 package format.  Therefore, it is
+   recommended that package managers be as flexible as possible for
+   handling Encap 1.x packages.
+
+   In particular, a package which contains one or more package scripts
+   should be considered an Encap 1.1 package, and the package scripts
+   should be executed as appropriate.  A package which does not contain
+   any package scripts may be considered an Encap 1.0 package.
+
+   Also, since the Encap 1.1 encap.exclude file syntax is a superset
+   of that of Encap 1.0, it is recommended that package managers accept
+   the 1.1 relative-path encap.exclude syntax in all Encap 1.x packages.
+
+3. Structure of Encap 2.0
+
+   Encap 2.0 retains the same basic structure as Encap 1.x, with the
+   exception that it does not support encap.exclude files.  Instead,
+   it offers the additional features specified in this section.
+
+3.1. Package Names and Versions
+
+   Each Encap 2.0 package's name is a unique identifier, called a
+   pkgspec.  The pkgspec consists of the package's name and optional
+   version, in this form:
+
+      pkgname[-version]
+
+   Here, pkgname is a label common to all versions of the package.  It
+   may contain any printable-ASCII character except for '/', '-', or
+   NULL.  A '-' character, if present, indicates the beginning of an
+   optional version suffix.  Versions consist of up to 5 '.'-delimited
+   alphanumeric strings, limited to 10 characters each.
+
+   When the version is not present in a pkgspec, the package is said
+   to have a null version.  If a null version of a package coexists
+   with other versions, the null version is considered the lowest
+   version.
+
+   Although '-' is an illegal character in a package name, many pre-
+   existing packages' names contain it.  It is recommended that package
+   managers attempt to parse these packages, but there is no guaruntee
+   that the parsing will succeed, given the possible ambiguities this
+   can introduce.
+
+3.2. The Package Directory
+
+   Files directly in the package directory of an Encap 2.0 package are
+   not processed when installing or removing a package.  Any files in
+   this directory (other than the special files described below) are
+   ignored.
+
+   Package creators are free to include informational files in this
+   directory.  Examples of this would be a patch applied to the stock
+   source code when the package was built or a sample configuration
+   file for the package.
+
+3.3. The Package README File
+
+   If an Encap 2.0 package contains a file called README in its
+   package directory, the package manager should display the contents
+   of this file before processing the package.
+
+3.4. Package Scripts
+
+   An Encap 2.0 package may include any of four supported package
+   scripts in the package directory.  If present, these scripts are
+   executed by the package manager at specific points during the
+   processing of the package.
+
+3.4.1. Preprocessing Scripts
+
+   The following scripts are executed by the package manager before
+   any package links are created or removed, respectively:
+
+      preinstall
+      preremove
+
+   If a preprocessing script returns a non-zero exit code, the package
+   manager must immediately abort processing the package.  In this
+   case, the installation or removal of the package is considered to
+   have failed.
+
+   The preprocessing scripts can be used to ensure that certain
+   conditions are met before processing the package.
+
+3.4.2. Postprocessing Scripts
+
+   The following scripts are executed by the package manager after all
+   package links have been created or removed, respectively:
+
+      postinstall
+      postremove
+
+   Note that a postprocessing script will only be executed if at least
+   one link has been successfully created or removed, as appropriate,
+   during the processing of the package.  If a postprocessing script
+   returns a non-zero exit code, the package manager must consider the
+   installation or removal of that package to have failed.
+
+   The postprocessing scripts are often used to perform configuration
+   changes outside of the Encap tree which are needed to complete the
+   installation of a given package.  Examples of this include adding
+   an entry to /etc/services or installing an rc script to start a
+   daemon at boot time.
+
+3.4.3. Guidelines for Package Scripts
+
+   Package scripts must adhere to the following guidelines:
+
+   1) A package's scripts may not modify system configuration files
+      that cause it to be run when the system reboots (such as
+      /etc/inetd.conf or any rc script) unless it has installed all
+      data files that it needs to start properly.  This is necessary
+      to prevent the system from being unusable after a reboot.
+
+   2) A package script which modifies or replaces pre-existing files
+      must always save a copy with the suffix ".pre.[pkgspec]", where
+      [pkgspec] is the pkgspec of the package being installed.
+
+   3) A package script which installs configuration files outside of
+      the Encap tree must copy the files to that location, rather than
+      create symlinks into the Encap tree.  This prevents problems
+      which can be arise when the Encap tree is unavailable at boot.
+
+   4) A package script which installs configuration files outside of
+      the Encap tree must not replace pre-existing customized
+      versions, except where necessary to adhere to the previous
+      guidelines.  An example of a valid exception is when a package
+      is upgraded to a version which changes the configuration syntax.
+
+   5) A package script must react properly when it is invoked multiple
+      times.  For example, if a postinstall script intends to add an
+      entry to /etc/services, it must not do so if the entry already
+      exists.
+
+   6) Package scripts may not prompt the user for input.  A package
+      script's stdout and stdin may be redirected somewhere other than
+      the terminal.  However, a script's stderr must always be sent to
+      the terminal so that the user is informed of error conditions.
+
+3.5. The encapinfo File
+
+   Every Encap 2.0 package must contain a file called encapinfo in the
+   package directory.  The encapinfo file contains all of the
+   configuration data for the package.
+
+   The first line of the encapinfo file must be of this form:
+
+      encap [version]
+
+   The "[version]" argument represents the version of the Encap
+   package format in which the package is encoded.
+
+   Future versions of the Encap package format will update this version
+   number, so package managers will be able to easily determine how
+   to install a given package.  If the encapinfo file does not exist,
+   the package is assumed to be an Encap 1.x package.
+
+   This section describes the syntax of the encapinfo file.
+
+3.5.1. Package Information
+
+   The following fields allow package creation information to be
+   encoded in the encapinfo file.  These fields are optional, but may
+   only be specified once if present.
+
+3.5.1.1. Platform
+
+   To identify the platform for which the package is intended, use
+   this syntax:
+
+      platform [operatingsystem-version]
+
+   The argument contains information describing the operating system
+   as determined by the uname(2) system call.  The "operatingsystem" part
+   is the sysname field of the utsname structure.  The "version" part is
+   the version of the operating system, as returned by the version and/or
+   release fields of the utsname structure.
+
+   It is strongly recommended that the platform field be present.
+
+3.5.1.2. Description
+
+   This field contains a one-line description of the package:
+
+      description [description text here]
+
+   This field can be used by the package manager to list the installed
+   packages.
+
+3.5.1.3. Creation Date
+
+   This field indicates the package creation information:
+
+      date [date]
+
+   This field specifies the date that the package was created on.
+   It must be encoded in the same format produced by the date(1) command
+   (also produced by the strftime(3) library call using the "%a %b %d
+   %H:%M:%S %Z %Y" format string).
+
+   It is strongly recommended that the date field be present.
+
+3.5.1.4. Contact Information
+
+   This field contains contact information for the person who created
+   the package:
+
+      contact [info]
+
+   It is recommended that the [info] argument contain the user's name
+   and email address in SMTP format.
+
+   It is strongly recommended that the contact field be present.
+
+3.5.2. Encap 2.0 Extensions
+
+   The following fields tell the package manager about special features
+   of Encap 2.0 that are needed by the package.  These fields can be
+   specified multiple times.
+
+3.5.2.1. Excluding Files
+
+   The following syntax allows files to be excluded from processing
+   when installing or removing a package:
+
+      exclude [file]
+
+   The [file] argument is a path relative to the package directory.
+   It can also contain shell globbing characters as understood by the
+   fnmatch(3) library call.
+
+   If the [file] argument specifies a directory, that directory is not
+   recursed into when the package is processed.
+
+3.5.2.2. Required Files
+
+   This directive specifies a file which is required to be
+   successfully processed in order for the package installation or
+   removal to be successful:
+
+      require [file]
+
+   The [file] argument specifies a path relative to the package
+   directory.  It can also contain shell globbing characters as
+   understood by the fnmatch(3) library call.
+
+   If the [file] argument refers to a directory, the directory must
+   either previously exist or the package manager must be able to
+   successfully create it.
+
+3.5.2.3. Linking Directories Instead of Their Contents
+
+   This directive indicates that a link should be created to the
+   specified directory, rather than create a new target directory and
+   create links to the contents of this directory:
+
+      linkdir [dirname]
+
+   The [dirname] argument specifies a path to a directory relative to
+   the package directory.
+
+   If a link cannot be created for to the specified directory, the
+   package manager should fall back to the normal method of recursing
+   into the directory and linking in all files below it.  This option
+   is commonly used for large library directories which are specific
+   to a single package, so that there are no conflicts for the
+   directory name.
+
+3.5.2.4. Naming Target Links
+
+   This directive indicates that the link for a given package file
+   should be named something different than the file it points to:
+
+      linkname [filepath] [newname]
+
+   The [filepath] argument is a path to a file within the package
+   relative to the package directory.  The [newname] argument
+   specifies the new basename for the link to the file specified by
+   [filepath].  Note that [newname] is not a full or relative path,
+   and therefore must not contain any '/' characters.
+
+3.5.2.5. File Prerequisites
+
+   This directive checks for the existance of a specified file on the
+   system:
+
+      prereq regfile [pathname]
+
+   The [pathname] argument is an absolute path which must exist on the
+   system.
+
+3.5.2.6. Directory Prerequisites
+
+   This directive checks for the existance of a specified directory on
+   the system:
+
+      prereq directory [pathname]
+
+   The [pathname] argument is the absolute path of the directory which
+   must exist on the system.
+
+3.5.2.7. Package Prerequisites
+
+   This directive checks for the existance of a specified Encap
+   package in the Encap source directory:
+
+      prereq pkgspec [<>=*] [pkgspec]
+
+   The first argument indicates what versions of the package can
+   satisfy the requirement.  Possible values are as follows:
+
+      =    specified version must be present
+      >    newer version must be present
+      <    older version must be present
+      >=   specified or newer version must be present
+      <=   specified or older version must be present
+      *    any version must be present
+
+   The second argument specifies the name and version of the package
+   which must be installed, subject to the modifications of the first
+   argument.
+
+4. Conflict Resolution
+
+   Often, when processing a package, there will be a conflict between
+   a pre-existing file and a link which needs to be created or
+   removed.  A standard method of conflict resolution is needed so
+   that this situation is handled correctly.
+
+4.1. Installation Conflicts
+
+   When the creation of a link fails because of a pre-existing file,
+   the package manager must look at the file to determine how to
+   procede.  By default, the package manager may only remove the
+   pre-existing file under the following conditions:
+
+   1) The pre-existing file is a link into the Encap source tree.
+   2) The pre-existing file points to a non-existant file, or it
+      points to an existing file in a package which the package
+      manager is configured to override.
+
+   If these conditions are not met, the package manager may not touch
+   the pre-existing file, and the link for that file fails.
+
+   The package manager may optionally provide a user-selectable flag
+   which tells it to force installation of the package.  If this flag
+   is given, any pre-existing file may be removed, and a link may be
+   created in its place.
+
+4.2. Removal Conflicts
+
+   When removing a package, the package manager must verify that each
+   link points to the expected place before removing it.  Specificly,
+   the link must point both to the right package and the right file
+   within the package.
+
+   The package manager may optionally provide a user-selectable flag
+   which tells it to force removal of the package.  If this flag is
+   given, any pre-existing file may be removed, even if it did not
+   point into the package being removed.
+
+4.3. Usage of the Target Directory
+
+   It is strongly recommended, but not required, that the target
+   directory be modified solely by the Encap package manager, and that
+   files other than Encap links not be placed there.  This practice
+   greatly reduces the risk of unresolvable conflicts.
+

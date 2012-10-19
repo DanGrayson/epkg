@@ -1,0 +1,130 @@
+/* @configure_input@ */
+
+/*
+**  Copyright 1998-2002 University of Illinois Board of Trustees
+**  Copyright 1998-2002 Mark D. Roth
+**  All rights reserved.
+**
+**  @PATHCODE_PREFIX@_relativepath.c - find relative path between two absolute paths
+**
+**  Mark D. Roth <roth@uiuc.edu>
+**  Campus Information Technologies and Educational Services
+**  University of Illinois at Urbana-Champaign
+*/
+
+#include <@PATHCODE_PREFIX@_pathcode.h>
+
+#include <stdio.h>
+#include <sys/param.h>
+#include <errno.h>
+
+#ifdef STDC_HEADERS
+# include <string.h>
+#endif
+
+
+/*
+** @PATHCODE_PREFIX@_relativepath() - return a relative path from start_dir to finish_dir
+** returns:
+**	0	success
+**	-1	failure (and sets errno)
+*/
+int
+@PATHCODE_PREFIX@_relativepath(char *start_dir, char *finish_dir,
+		     char *buf, size_t bufsize)
+{
+	char buf1[MAXPATHLEN], buf2[MAXPATHLEN];
+	char *nextp1 = buf1, *nextp2 = buf2, *tok1, *tok2;
+
+#ifdef DEBUG
+	printf("==> @PATHCODE_PREFIX@_relativepath(\"%s\", \"%s\", 0x%lx, %d)\n",
+	       start_dir, finish_dir, buf, bufsize);
+#endif
+
+	buf[0] = '\0';
+
+	/* both arguments must be absolute paths */
+	if (start_dir[0] != '/' || finish_dir[0] != '/')
+	{
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (@PATHCODE_PREFIX@_cleanpath(start_dir, buf1, sizeof(buf1)) == -1 ||
+	    @PATHCODE_PREFIX@_cleanpath(finish_dir, buf2, sizeof(buf2)) == -1)
+		return -1;
+
+	/* skip past the common path elements */
+	do
+	{
+		tok1 = strsep(&nextp1, "/");
+		tok2 = strsep(&nextp2, "/");
+	}
+	while (tok1 != NULL && tok2 != NULL && strcmp(tok1, tok2) == 0);
+
+	/*
+	 * add ".." elements to get from start_dir back up to the
+	 * directory where the two paths diverge
+	 */
+	if (tok1 != NULL)
+	{
+		if (strlcat(buf, "..", bufsize) > bufsize)
+		{
+			errno = ENAMETOOLONG;
+			return -1;
+		}
+		while ((tok1 = strsep(&nextp1, "/")) != NULL)
+		{
+			if (strlcat(buf, "/..", bufsize) > bufsize)
+			{
+				errno = ENAMETOOLONG;
+				return -1;
+			}
+		}
+	}
+
+	/* add remaining components from finish_dir */
+	if (tok2 != NULL)
+	{
+		if ((buf[0] != '\0' && strlcat(buf, "/", bufsize) > bufsize)
+		    || strlcat(buf, tok2, bufsize) > bufsize)
+		{
+			errno = ENAMETOOLONG;
+			return -1;
+		}
+		while ((tok2 = strsep(&nextp2, "/")) != NULL)
+		{
+			if (strlcat(buf, "/", bufsize) > bufsize
+			    || strlcat(buf, tok2, bufsize) > bufsize)
+			{
+				errno = ENAMETOOLONG;
+				return -1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+#ifdef TEST_RELATIVEPATH
+
+int
+main(int argc, char *argv[])
+{
+	char buf[MAXPATHLEN];
+
+	printf("@PATHCODE_PREFIX@_relativepath(\"%s\", \"%s\") == ", argv[1], argv[2]);
+	if (@PATHCODE_PREFIX@_relativepath(argv[1], argv[2], buf, sizeof(buf)) == -1)
+	{
+		perror("@PATHCODE_PREFIX@_relativepath()");
+		exit(1);
+	}
+	printf("\"%s\"\n", buf);
+
+	exit(0);
+}
+
+#endif /* TEST_RELATIVEPATH */
+
+

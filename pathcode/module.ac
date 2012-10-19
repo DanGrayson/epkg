@@ -1,0 +1,24 @@
+AC_DEFUN(subdir[_INIT], [
+  AC_REQUIRE([COMPAT_FUNC_STRLCAT])
+  AC_REQUIRE([COMPAT_FUNC_STRLCPY])
+  AC_REQUIRE([COMPAT_FUNC_STRSEP])
+  AC_REQUIRE([COMPAT_FUNC_SNPRINTF])
+
+  if test -z "$2"; then
+    PATHCODE_PREFIX="${PACKAGE_NAME}";
+  else
+    PATHCODE_PREFIX="$2";
+  fi
+  AC_SUBST([PATHCODE_PREFIX])
+
+  PATHCODE_DIR="$1";
+  AC_SUBST([PATHCODE_DIR])
+
+  AC_CONFIG_FILES([$1/${PATHCODE_PREFIX}_cleanpath.c:$1/cleanpath.c.in])
+  AC_CONFIG_FILES([$1/${PATHCODE_PREFIX}_gsub.c:$1/gsub.c.in])
+  AC_CONFIG_FILES([$1/${PATHCODE_PREFIX}_mkdirhier.c:$1/mkdirhier.c.in])
+  AC_CONFIG_FILES([$1/${PATHCODE_PREFIX}_pathcode.h:$1/pathcode.h.in])
+  AC_CONFIG_FILES([$1/${PATHCODE_PREFIX}_relativepath.c:$1/relativepath.c.in])
+  AC_CONFIG_FILES([$1/${PATHCODE_PREFIX}_rmtree.c:$1/rmtree.c.in])
+])
+

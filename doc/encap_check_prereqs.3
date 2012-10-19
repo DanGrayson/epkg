@@ -1,0 +1,18 @@
+.TH encap_check_prereqs 3 "Oct 2002" "University of Illinois" "C Library Calls"
+.SH NAME
+encap_check_prereqs \- check prerequisites for an Encap package
+.SH SYNOPSIS
+.B #include <encap.h>
+.P
+.BI "int encap_check_prereqs(ENCAP *" encap ");"
+.SH VERSION
+This man page documents version 2.3 of \fBlibencap\fP.
+.SH DESCRIPTION
+The \fBencap_check_prereqs\fP() function checks the prerequisites
+for the Encap package associated with \fIencap\fP.
+.SH RETURN VALUES
+The \fBencap_check_prereqs\fP() function returns 0 on success, 1 if the
+package's prerequisites were not satisfied, or -1 on error (and sets
+\fIerrno\fP).
+.SH SEE ALSO
+.BR encap_open (3)

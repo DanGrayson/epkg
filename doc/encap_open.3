@@ -1,0 +1,167 @@
+.TH encap_open 3 "Oct 2002" "University of Illinois" "C Library Calls"
+.SH NAME
+encap_open, encap_close \- manage Encap package handles
+.SH SYNOPSIS
+.B #include <encap.h>
+.br
+.B #include <stdarg.h>
+.P
+.BI "typedef int (*" encap_print_func_t ")(ENCAP *" encap ","
+.BI "encap_source_info_t *" srcinfo ", encap_target_info_t *" tgtinfo ","
+.BI "unsigned int " type ", char *" fmt ", ...);"
+
+.BI "int encap_open(ENCAP **" encap ", char *" source ","
+.BI "char *" target ", char *" pkgname ", unsigned long " options ","
+.BI "encap_print_func_t " print_func ");"
+
+.BI "void encap_close(ENCAP *" encap ");"
+.SH VERSION
+This man page documents version 2.3 of \fBlibencap\fP.
+.SH DESCRIPTION
+The \fBencap_open\fP() function creates an \fIENCAP\fP handle associated
+with the Encap package \fIpkgname\fP.  This handle can be passed to other
+\fBlibencap\fP functions to manipulate Encap packages.
+
+The \fIoptions\fP argument is a bitwise-or of zero or more of the
+following:
+.TP
+.B OPT_FORCE
+Force operations to succeed whenever possible.
+.TP
+.B OPT_SHOWONLY
+Determine what would be done, but do not actually do it.
+.TP
+.B OPT_ABSLINKS
+Use absolute symlinks instead of relative symlinks.
+.TP
+.B OPT_PREREQS
+Check prerequisites before installation.
+.TP
+.B OPT_RUNSCRIPTS
+Run package scripts.
+.TP
+.B OPT_EXCLUDES
+Honor package exclusions.
+.TP
+.B OPT_RUNSCRIPTSONLY
+Run package scripts, but do not attempt to link or remove files.
+.TP
+.B OPT_NUKETARGETDIRS
+Remove empty target directories.
+.TP
+.B OPT_PKGDIRLINKS
+Link files directly from the package directory.
+.TP
+.B OPT_LINKDIRS
+Honor package linkdir directives.
+.TP
+.B OPT_LINKNAMES
+Honor package linkname directives.
+.TP
+.B OPT_TARGETEXCLUDES
+Honor \fIencap.exclude\fP files under the target directory.  (This is used
+when cleaning the Encap target; see \fBencap_target_clean\fP(3) for more
+information.)
+.PP
+The \fIprint_func\fP function is used by \fIlibencap\fP to communicate
+its actions to the calling application.  The \fIencap\fP argument is
+the \fBENCAP\fP handle associated with the package being processed.
+The \fIsrcinfo\fP and \fItgtinfo\fP structures describe the file
+being processed, but may be set to \fINULL\fP for errors which are not
+associated with a specific file.  The \fItype\fP argument denotes the
+disposition using one of the following values:
+.TP
+.B EPT_INST_OK
+Installation of the link or directory corresponding to the file described by
+\fIsrcinfo\fP has succeeded.
+.TP
+.B EPT_INST_REPL
+Installation of the link or directory corresponding to the file described by
+\fIsrcinfo\fP has succeeded, but a pre-existing link was replaced in the
+process.
+.TP
+.B EPT_INST_FAIL
+Installation of the link or directory corresponding to the file described by
+\fIsrcinfo\fP has failed due to an Encap conflict.
+.TP
+.B EPT_INST_ERROR
+Installation of the link or directory corresponding to the file described by
+\fIsrcinfo\fP has failed due to a system or library call error, and
+\fIerrno\fP is set to indicate the error.
+.TP
+.B EPT_INST_NOOP
+The link or directory which corresponds to the file described by \fIsrcinfo\fP
+is already installed, so no action was necessary.
+.TP
+.B EPT_REM_OK
+Removal of the link or directory corresponding to the file described by
+\fIsrcinfo\fP has succeeded.
+.TP
+.B EPT_REM_FAIL
+Removal of the link or directory corresponding to the file described by
+\fIsrcinfo\fP has failed due to an Encap conflict.
+.TP
+.B EPT_REM_ERROR
+Removal of the link or directory corresponding to the file described by
+\fIsrcinfo\fP has failed due to a system or library call error, and
+\fIerrno\fP is set to indicate the error.
+.TP
+.B EPT_REM_NOOP
+The link or directory which corresponds to the file described by \fIsrcinfo\fP
+is already removed, so no action was necessary.
+.TP
+.B EPT_CHK_NOOP
+The link or directory which corresponds to the file described by \fIsrcinfo\fP
+is properly installed.
+.TP
+.B EPT_CHK_FAIL
+The link or directory which corresponds to the file described by \fIsrcinfo\fP
+is not properly installed.
+.TP
+.B EPT_CHK_ERROR
+Checking of the link or directory corresponding to the file described by
+\fIsrcinfo\fP has failed due to a system or library call error, and
+\fIerrno\fP is set to indicate the error.
+.TP
+.B EPT_PKG_INFO
+Informational message about the package, such as files that are excluded or
+prerequisites which are successfully processed.
+.TP
+.B EPT_PKG_FAIL
+General package failure, such as a failed prerequisite.
+.TP
+.B EPT_PKG_ERROR
+General package failure due to a system or library call error.  In this case,
+\fIerrno\fP is set to indicate the error.
+.TP
+.B EPT_PKG_RAW
+Raw output, such as the output of a package script or the contents of a README
+file.
+.TP
+.B EPT_CLN_OK
+The stale Encap link whose path is \fIsrcinfo->src_target_path\fP was removed
+successfully.
+.TP
+.B EPT_CLN_INFO
+Informational message during target cleaning, such as files that are excluded.
+.TP
+.B EPT_CLN_FAIL
+General target cleaning failure, such as a file directly in target tree or a
+symlink to somewhere other than the Encap source directory.
+.TP
+.B EPT_CLN_ERROR
+Failed to remove a link or directory while cleaning the target directory due
+to a system or library call error.  In this case, \fIerrno\fP is set to
+indicate the error.
+.TP
+.B EPT_CLN_NOOP
+Encountered a valid link while cleaning the Encap target.
+.PP
+The \fIfmt\fP argument and all successive arguments are identical to those
+used by the \fBprintf\fP() function.
+
+The \fBencap_close\fP() function frees all resources associated with the 
+\fIENCAP\fP handle.
+.SH RETURN VALUES
+The \fBencap_open\fP() function returns 0 on success, or -1 on failure (and
+sets \fIerrno\fP).

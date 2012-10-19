@@ -1,0 +1,70 @@
+.TH encap_install 3 "Oct 2002" "University of Illinois" "C Library Calls"
+.SH NAME
+encap_install, encap_remove, encap_check \- perform operations on Encap packages
+.SH SYNOPSIS
+.B #include <encap.h>
+.P
+.BI "typedef int (*" encap_decision_func_t ")(ENCAP *" encap ","
+.BI "encap_source_info_t *" srcinfo ", encap_target_info_t *" tgtinfo ");"
+
+.BI "int encap_install(ENCAP *" encap ", encap_decision_func_t " decision_func ");"
+
+.BI "int encap_remove(ENCAP *" encap ", encap_decision_func_t " decision_func ");"
+
+.BI "int encap_check(ENCAP *" encap ", encap_decision_func_t " decision_func ");"
+.SH VERSION
+This man page documents version 2.3 of \fBlibencap\fP.
+.SH DESCRIPTION
+The \fBencap_install\fP(), \fBencap_remove\fP(), and \fBencap_check\fP()
+functions can be used to install, remove, or check the status of the
+package associated with \fIencap\fP.  If the \fIdecision_func\fP argument
+is not \fINULL\fP, the function it points to is called to evaluate the link
+and override \fIlibencap\fP's decision about how to handle it.  This allows
+the calling application to have more fine-grained control over Encap
+processing.
+
+The \fIdecision_func\fP function is called for each file which is processed.
+The \fIencap\fP argument is the \fBENCAP\fP handle associated with the
+package being processed.  The \fIsrcinfo\fP structure is the description
+of the Encap source file which is returned by \fBencap_check_source\fP(3).
+The \fItgtinfo\fP structure is the description of the Encap target link
+which is returned by \fBencap_check_target\fP(3).
+
+The \fIdecision_func\fP function must return one of the following values to
+tell \fIlibencap\fP how to proceed:
+.TP
+.B R_RETURN
+Fatal error.  Stop processing the Encap and return immediately.
+.TP
+.B R_ERR
+Non-fatal error.  Processing continues with the next file in the Encap
+package.  (Note that if \fBSRC_REQUIRED\fP is set in \fIsrcinfo->src_flags\fP,
+a fatal error will result.  This case is handled the same as if
+\fIdecision_func\fP() had returned \fBR_RETURN\fP.)
+.TP
+.B R_FILEOK
+File should be processed normally.
+.TP
+.B R_SKIP
+Do not process this file.  No error is recorded, and Processing continues
+with the next file in the Encap package.
+.SH RETURN VALUES
+The \fBencap_install\fP(), \fBencap_remove\fP(), and \fBencap_check\fP() 
+functions each return one of the following values:
+.TP
+.B ENCAP_STATUS_NOOP
+No action was needed.
+.TP
+.B ENCAP_STATUS_SUCCESS
+Operation successful.
+.TP
+.B ENCAP_STATUS_PARTIAL
+Operation partially successful.  Some files were processed successfully, but
+at least one error was encountered.
+.TP
+.B ENCAP_STATUS_FAILED
+Operation failed.
+.SH SEE ALSO
+.BR encap_open (3),
+.BR encap_check_source (3),
+.BR encap_check_target (3)

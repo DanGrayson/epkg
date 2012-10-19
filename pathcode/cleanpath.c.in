@@ -1,0 +1,135 @@
+/* @configure_input@ */
+
+/*
+**  Copyright 1998-2002 University of Illinois Board of Trustees
+**  Copyright 1998-2002 Mark D. Roth
+**  All rights reserved.
+**
+**  @PATHCODE_PREFIX@_cleanpath.c - function to clean up path names
+**
+**  Mark D. Roth <roth@uiuc.edu>
+**  Campus Information Technologies and Educational Services
+**  University of Illinois at Urbana-Champaign
+*/
+
+#include <@PATHCODE_PREFIX@_pathcode.h>
+
+#include <stdio.h>
+#include <sys/param.h>
+#include <errno.h>
+
+#ifdef STDC_HEADERS
+# include <string.h>
+#endif
+
+
+/*
+** @PATHCODE_PREFIX@_cleanpath() - create a clean representation of path via string manipulation:
+**    - squeezes multiple '/' characters
+**    - removes previous directory with ".." (except at start of relative path)
+**    - removes "." (except where all path components cancel)
+*/
+int
+@PATHCODE_PREFIX@_cleanpath(char *path, char *buf, size_t bufsize)
+{
+	char work[MAXPATHLEN];
+	char *cp, *thisp, *nextp = work;
+
+#ifdef DEBUG
+	printf("==> @PATHCODE_PREFIX@_cleanpath(path=\"%s\", buf=0x%lx, bufsize=%d)\n",
+	       path, buf, bufsize);
+#endif
+
+	cp = strchr(path, '/');
+
+	/* no '/' characters - return as-is */
+	if (cp == NULL)
+	{
+		strlcpy(buf, (path[0] != '\0' ? path : "."), bufsize);
+		return 0;
+	}
+
+	/* copy leading slash if present */
+	if (cp == path)
+		strlcpy(buf, "/", bufsize);
+	else
+		buf[0] = '\0';
+
+	/* tokenization */
+	strlcpy(work, path, sizeof(work));
+	while ((thisp = strsep(&nextp, "/")) != NULL)
+	{
+		if (*thisp == '\0')
+			continue;
+
+		if (strcmp(thisp, ".") == 0)
+			continue;
+
+		if (strcmp(thisp, "..") == 0)
+		{
+			cp = strrchr(buf, '/');
+
+			if (cp == buf)		/* "/" or "/foo" */
+			{
+				buf[1] = '\0';
+				continue;
+			}
+			else if (cp == NULL)	/* "..", "foo", or "" */
+			{
+				if (buf[0] != '\0' && strcmp(buf, "..") != 0)
+				{
+					buf[0] = '\0';
+					continue;
+				}
+			}
+			else			/* ".../foo" */
+			{
+				*cp = '\0';
+				continue;
+			}
+		}
+
+		if (buf[0] != '\0' && buf[strlen(buf) - 1] != '/')
+		{
+			if (strlcat(buf, "/", bufsize) > bufsize)
+			{
+				errno = ENAMETOOLONG;
+				return -1;
+			}
+		}
+
+		if (strlcat(buf, thisp, bufsize) > bufsize)
+		{
+			errno = ENAMETOOLONG;
+			return -1;
+		}
+	}
+
+	if (buf[0] == '\0')
+		strlcpy(buf, ".", bufsize);
+
+#ifdef DEBUG
+	printf("<== @PATHCODE_PREFIX@_cleanpath(): buf=\"%s\"\n", buf);
+#endif
+
+	return 0;
+}
+
+
+#ifdef TEST_CLEANPATH
+
+int
+main(int argc, char *argv[])
+{
+	char buf[MAXPATHLEN];
+
+	printf("@PATHCODE_PREFIX@_cleanpath(\"%s\") == ", argv[1]);
+	@PATHCODE_PREFIX@_cleanpath(argv[1], buf, sizeof(buf));
+	printf("\"%s\"\n", buf);
+
+	exit(0);
+}
+
+#endif /* TEST_CLEANPATH */
+
+
