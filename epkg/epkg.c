@@ -406,9 +406,6 @@ main(int argc, char *argv[])
 		printf("\n\n");
 	}
 
-	/* before we actually write anything... */
-	umask(022);
-
 	switch (pkg_mode)
 	{
 
