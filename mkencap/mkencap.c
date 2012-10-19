@@ -419,10 +419,6 @@ main(int argc, char *argv[])
 	if (verbose > 1)
 		printf("### source directory:\t\t%s\n", source);
 
-	/* before we actually write anything... */
-	/* FIXME: should we really be doing this? */
-	umask(022);
-
 	/*
 	** set contact field here, because $ENCAP_CONTACT won't be
 	** available when we need it in build.c
