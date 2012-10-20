@@ -58,7 +58,7 @@ int
 			strcat(dst, "/");
 		strcat(dst, dirp);
 
-		if (mkdir(dst, 0755) == -1)
+		if (mkdir(dst, 0777) == -1)
 		{
 			if (errno != EEXIST)
 				return -1;

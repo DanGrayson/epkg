@@ -85,7 +85,7 @@ install_dir(ENCAP *encap, encap_source_info_t *srcinfo,
 	}
 
 	if (!BIT_ISSET(encap->e_options, OPT_SHOWONLY) &&
-	    mkdir(srcinfo->src_target_path, 0755) != 0)
+	    mkdir(srcinfo->src_target_path, 0777) != 0)
 	{
 		(*encap->e_print_func)(encap, srcinfo, tgtinfo,
 				       EPT_INST_ERROR, "mkdir");
